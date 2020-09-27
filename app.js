@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const morgan = require('morgan')
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-
+const expressValidator = require('express-validator');
 require('dotenv').config();
 
 // import routes 
@@ -15,7 +15,7 @@ const app = express();
 mongoose
   .connect(process.env.DATABASE, {
     usedNewUrlParser: true,
-    useCreateIndex: true,
+    useCreaghhhhteIndex: true,
     useFindAndModify: false,
   })
   .then((con) => console.log('DB connection successful'));
@@ -24,6 +24,7 @@ mongoose
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
+//app.use(expressValidator());
 //router middlelware
 app.use('/api',userRoutes);
 
