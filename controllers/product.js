@@ -1,5 +1,5 @@
 const formidable = require('formidable'); // for uploading image
-const lodash=require('lodash'); // for uploading image
+const lodash=require('lodash'); // for updating fields
 const fs = require('fs');
 const Product = require('../models/product');
 const {errorHandler} = require('../helpers/dbErrorHandler');
@@ -89,7 +89,6 @@ exports.remove = (req, res) => {
 }
 
 exports.update = (req, res) => {
-    console.log("Product Controller", req.body);
     let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
     form.keepExtensions = true; // what ever image type is getting extentions will be there
     form.parse(req, (err, fields, files)=>{ // parsing the form for files and fields
