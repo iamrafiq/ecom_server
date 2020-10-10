@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
-const categorySchema = new mongoose.Schema(
+const categorySchemaTemp = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -10,10 +10,7 @@ const categorySchema = new mongoose.Schema(
       maxlength: 32,
       unique: true,
     },
-    parent: { type: ObjectId, ref: "Category" },
-    children:{
-      type: Object
-    },
+    childs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
     icon: {
       data: Buffer,
       contentType: String,
@@ -66,4 +63,4 @@ categorySchema
 
 
 
-module.exports = mongoose.model("Category", categorySchema);
+module.exports = mongoose.model("CategoryTemp", categorySchemaTemp);
