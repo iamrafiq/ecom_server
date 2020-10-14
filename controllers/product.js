@@ -18,7 +18,6 @@ exports.productById = (req, res, next, id) => {
       req.product = product;
       next();
     });
-    
 };
 
 exports.read = (req, res) => {
@@ -39,7 +38,7 @@ exports.create = (req, res) => {
     }
 
     // check for all fields
-    
+
     const { name, description, price, category, quantity, shipping } = fields;
     if (
       !name ||
@@ -98,42 +97,41 @@ exports.remove = (req, res) => {
 };
 
 exports.update = (req, res) => {
-  console.log("update.................")
+  console.log("update.................");
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
   form.parse(req, (err, fields, files) => {
-      if (err) {
-          return res.status(400).json({
-              error: 'Image could not be uploaded'
-          });
-      }
-
-
-      let product = req.product;
-      product = lodash.extend(product, fields);
-      console.log("Product", product)
-      // 1kb = 1000
-      // 1mb = 1000000
-
-      if (files.photo) {
-          // console.log("FILES PHOTO: ", files.photo);
-          if (files.photo.size > 1000000) {
-              return res.status(400).json({
-                  error: 'Image should be less than 1mb in size'
-              });
-          }
-          product.photo.data = fs.readFileSync(files.photo.path);
-          product.photo.contentType = files.photo.type;
-      }
-
-      product.save((err, result) => {
-          if (err) {
-              return res.status(400).json({
-                  error: errorHandler(err)
-              });
-          }
-          res.json(result);
+    if (err) {
+      return res.status(400).json({
+        error: "Image could not be uploaded",
       });
+    }
+
+    let product = req.product;
+    product = lodash.extend(product, fields);
+    console.log("Product", product);
+    // 1kb = 1000
+    // 1mb = 1000000
+
+    if (files.photo) {
+      // console.log("FILES PHOTO: ", files.photo);
+      if (files.photo.size > 1000000) {
+        return res.status(400).json({
+          error: "Image should be less than 1mb in size",
+        });
+      }
+      product.photo.data = fs.readFileSync(files.photo.path);
+      product.photo.contentType = files.photo.type;
+    }
+
+    product.save((err, result) => {
+      if (err) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+      res.json(result);
+    });
   });
 };
 
@@ -269,7 +267,7 @@ exports.listSearch = (req, res) => {
   const query = {};
   //assign search value to query.name
   if (req.query.search) {
-    query.name = { $regex: req.query.search, $options: "i" };
+    query.name = { $regex: req.query.search, $options: "i" }; // "i" for case sensitivity lower or uper both case
     // assigne category value to query.category
     if (req.query.category && req.query.category != "All") {
       query.category = req.query.category;
@@ -307,4 +305,25 @@ exports.decreaseQuantity = (req, res, next) => {
     }
     next();
   });
+};
+
+exports.productsByCategory = (req, res) => {
+  //create query object to hold search value and category value
+  console.log("....", req.params.categoryId)
+  const query = {};
+  if (req.query.category) {
+    query.category = req.query.category;
+  }
+  // find the product base on query object with 2 properties
+  // search and category
+
+  Product.find(query, (err, products) => {
+    console.log(err);
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    }
+    res.json(products);
+  }).select("-photo");
 };

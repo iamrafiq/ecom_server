@@ -14,6 +14,7 @@ const categorySchema = new mongoose.Schema(
     children:{
       type: Object
     },
+    products:[{type:ObjectId, ref:"Product"}],
     icon: {
       data: Buffer,
       contentType: String,

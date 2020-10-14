@@ -84,6 +84,17 @@ exports.categoryById = (req, res, next, id) => {
     next();
   });
 };
+exports.children = (req, res, next) => {
+  Category.find({ parent:req.category._id}) // ne is a oparator this will discard the product related to the _id so this query will return all other products
+    .exec((err, categoris) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Products not found",
+        });
+      }
+      res.json(categoris);
+    });
+};
 
 exports.read = (req, res) => {
   return res.json(req.category);
@@ -222,4 +233,19 @@ exports.thumbnail = (req, res, next) => {
     return res.send(req.category.thumbnail.data);
   }
   next();
+};
+
+exports.getAllProducts = (req, res) => {
+  //create query object to hold search value and category value
+  console.log("....", req.params.categoryId)
+
+  Category.find( req.category._id, (err, products) => {
+    console.log(err);
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    }
+    res.json(products);
+  }).populate("products","-photo").select("-photo");
 };
