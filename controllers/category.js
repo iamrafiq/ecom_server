@@ -10,7 +10,6 @@ exports.create = (req, res) => {
   form.keepExtensions = true; // what ever image type is getting extentions will be there
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
-    console.log(err);
     if (err) {
       return res.status(400).json({
         error: JSON.stringify(err),
@@ -33,7 +32,6 @@ exports.create = (req, res) => {
     let category = new Category(fields);
 
     if (files.icon) {
-      //console.log('Files photo: ', files.photo);
       //1kb = 1000
       //1mb = 1000000
       if (files.icon.size > 200000000) {
@@ -45,7 +43,7 @@ exports.create = (req, res) => {
       category.icon.contentType = files.icon.type;
     }
     if (files.thumbnail) {
-      //console.log('Files photo: ', files.photo);
+      //console.log('Files icon: ', files.icon);
       //1kb = 1000
       //1mb = 1000000
       if (files.thumbnail.size > 2500000000) {
@@ -64,7 +62,7 @@ exports.create = (req, res) => {
         });
       }
 
-      //result.photo ='undefined'; // not sending the imge back
+      //result.icon ='undefined'; // not sending the imge back
       res.json(result);
     });
   });
@@ -134,7 +132,7 @@ exports.update = (req, res) => {
     category = lodash.extend(category, fields);
 
     if (files.icon) {
-      //console.log('Files photo: ', files.photo);
+      //console.log('Files icon: ', files.icon);
       //1kb = 1000
       //1mb = 1000000
       if (files.icon.size > 200000000) {
@@ -146,7 +144,7 @@ exports.update = (req, res) => {
       category.icon.contentType = files.icon.type;
     }
     if (files.thumbnail) {
-      //console.log('Files photo: ', files.photo);
+      //console.log('Files icon: ', files.icon);
       //1kb = 1000
       //1mb = 1000000
       if (files.thumbnail.size > 2500000000) {
@@ -165,7 +163,7 @@ exports.update = (req, res) => {
         });
       }
 
-      //result.photo ='undefined'; // not sending the imge back
+      //result.icon ='undefined'; // not sending the imge back
       res.json(result);
     });
   });
@@ -188,7 +186,7 @@ exports.list = (req, res) => {
 
 exports.tree = (req, res) => {
   Category.find({ trash: false })
-    .select("-icon -thumbnail")
+    .select("-thumbnail")
     .sort('order')
     .exec((err, data) => {
       if (err) {
@@ -202,8 +200,7 @@ exports.tree = (req, res) => {
         return acc;
       }, {});
 
-      let root;
-
+      let root="";
       data.forEach((el) => {
         // Handle the root element
         if (!el.parent || el.parent === null) {
@@ -216,7 +213,7 @@ exports.tree = (req, res) => {
         parentEl.children = [...(parentEl.children || []), el];
       });
 
-      res.json(root);
+      res.json(root.children);
     });
 };
 
