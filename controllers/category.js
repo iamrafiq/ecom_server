@@ -93,29 +93,11 @@ exports.create = (req, res) => {
             .catch((err) => {
               console.log(err);
             });
-          // category.save((err, pResults) => {
-          //   if (err) {
-          //     return res.status(400).json({
-          //       error: JSON.stringify(err),
-          //     });
-          //   }
-          // });
         });
       })
       .catch((error) => {
         console.log(error);
       });
-
-    // category.save((err, result) => {
-    //   if (err) {
-    //     return res.status(400).json({
-    //       error: JSON.stringify(err),
-    //     });
-    //   }
-
-    //   //result.icon ='undefined'; // not sending the imge back
-    //   res.json(result);
-    // });
   });
 };
 
@@ -148,7 +130,7 @@ exports.categoryById = (req, res, next, id) => {
 
 exports.categoryBySlug = (req, res, next, slug) => {
   console.log("categoryBySlug", slug);
-  Category.find({ slug: slug })
+  Category.findOne({ slug: slug })
     .select("-icon -thumbnail")
     .exec((err, category) => {
       if (err || !category) {
@@ -214,20 +196,6 @@ exports.remove = (req, res) => {
       });
   });
 
-  // finally remove the category
-
-  // category.remove((err, deletedCategory) => {
-  //   if (err) {
-  //     return res.status(400).json({
-  //       error: errorHandler(err),
-  //     });
-  //   }
-
-  //   res.json({
-  //     //deletedCategory,
-  //     message: "Category deleted successfully",
-  //   });
-  // });
 };
 
 exports.update = (req, res) => {
@@ -329,40 +297,15 @@ exports.update = (req, res) => {
       .catch((err) => {
         console.log(result);
       });
-    // category.save((err, result) => {
-    //   if (err) {
-    //     return res.status(400).json({
-    //       error: JSON.stringify(err),
-    //     });
-    //   }
-    //   Category.findById(result.parent).exec((err, category) => {
-    //     if (err || !category) {
-    //       return res.status(400).json({
-    //         error: errorHandler(err),
-    //       });
-    //     }
-    //     category.children.push(result._id);
-    //     console.log("results", category);
-
-    //     category.save((err, pResults) => {
-    //       if (err) {
-    //         return res.status(400).json({
-    //           error: JSON.stringify(err),
-    //         });
-    //       }
-    //     });
-    //   });
-    //   //result.icon ='undefined'; // not sending the imge back
-    //   res.json(result);
-    // });
   });
 };
 
 exports.items = (req, res) => {
-  // res.json(req.category);
-  Category.findAll({ parent: req.category._id })
+  //  res.json(req.category);
+  // console.log("req.catid", req.category._id)
+  Category.findById(req.category._id)
     .select("-icon -thumbnail")
-    // .populate('products')
+     .populate("subcats", "-icon -thumbnail")
     .exec((err, data) => {
       if (err) {
         return res.status(400).json({

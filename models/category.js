@@ -20,7 +20,7 @@ const categorySchema = new mongoose.Schema(
       type: Object
     },
     subcats:[{
-      type: Object, ref: "Category"
+      type: ObjectId, ref: "Category"
     }],
     products:[{type:ObjectId, ref:"Product"}],
     icon: {
