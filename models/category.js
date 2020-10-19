@@ -10,10 +10,18 @@ const categorySchema = new mongoose.Schema(
       maxlength: 32,
       unique: true,
     },
+    slug:{
+      type:String,
+      required: true,
+      unique: true
+    },
     parent: { type: ObjectId, ref: "Category" },
     children:{
       type: Object
     },
+    subcats:[{
+      type: Object, ref: "Category"
+    }],
     products:[{type:ObjectId, ref:"Product"}],
     icon: {
       data: Buffer,
