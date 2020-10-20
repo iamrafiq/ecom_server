@@ -16,7 +16,8 @@ const categorySchema = new mongoose.Schema(
       unique: true
     },
     parent: { type: ObjectId, ref: "Category" },
-    children:{
+    children:{ 
+      // used for only building tree, in the db there is no such a field, name children is not changeable
       type: Object
     },
     subcats:[{
