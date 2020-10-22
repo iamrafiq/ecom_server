@@ -46,6 +46,11 @@ exports.create = (req, res) => {
 
     let category = new Category(fields);
 
+    if (fields.recursiveCats) {
+      const recursiveCats = fields.recursiveCats.split(",");
+      category.recursiveCategories = recursiveCats;
+    }
+
     if (files.icon) {
       //1kb = 1000
       //1mb = 1000000
@@ -117,21 +122,24 @@ exports.checkBySlug = (slug) => {
 exports.categoryById = (req, res, next, id) => {
   console.log("categoryById", id);
 
-  Category.findById(id).exec((err, category) => {
-    if (err || !category) {
-      return res.status(400).json({
-        error: errorHandler(err),
-      });
-    }
-    req.category = category;
-    next();
-  });
+  Category.findById(id)
+    .populate("parent", "-icon -thumbnail")
+    .exec((err, category) => {
+      if (err || !category) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+      req.category = category;
+      next();
+    });
 };
 
 exports.categoryBySlug = (req, res, next, slug) => {
   console.log("categoryBySlug", slug);
   Category.findOne({ slug: slug })
     .select("-icon -thumbnail")
+    .populate("parent", "-icon -thumbnail")
     .exec((err, category) => {
       if (err || !category) {
         return res.status(400).json({
@@ -145,6 +153,7 @@ exports.categoryBySlug = (req, res, next, slug) => {
 
 exports.children = (req, res, next) => {
   Category.find({ parent: req.category._id })
+    .populate("parent", "-icon -thumbnail")
     .select("-icon -thumbnail")
     .exec((err, categoris) => {
       if (err) {
@@ -160,9 +169,61 @@ exports.read = (req, res) => {
   return res.json(req.category);
 };
 
+// exports.remove = (req, res) => {
+//   console.log("remove called");
+//   let category = req.category; //add the the sub cat id to new parents
+//   Category.findById(category.parent).exec((err, parent) => {
+//     if (err || !parent) {
+//       return res.status(400).json({
+//         error: errorHandler(err),
+//       });
+//     }
+
+//     const index = parent.subcats.indexOf(category._id);
+//     if (index > -1) {
+//       parent.subcats.splice(index, 1);
+//     }
+
+//     parent
+//       .save()
+//       .then((result1) => {
+//         console.log(result1);
+//         category
+//           .remove()
+//           .then((result2) => {
+//             res.json({
+//               //deletedCategory,
+//               message: "Category deleted successfully",
+//             });
+//           })
+//           .catch((err) => {
+//             console.log(err);
+//           });
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//   });
+// };
+
 exports.remove = (req, res) => {
   console.log("remove called");
   let category = req.category; //add the the sub cat id to new parents
+  console.log("remove called", category.subcats);
+
+  if (!category.subcats || category.subcats.length === 0) {
+    removeFast(category, res, category.name);
+  } else {
+    return res.status(400).json({
+      error: "Delete all subcategories at first",
+    });
+   // recursiveDeleter(category.subcats, res, category.name);
+  }
+};
+
+const removeFast = (category, res, parentName) => {
+  console.log("remove fast cat", category);
+
   Category.findById(category.parent).exec((err, parent) => {
     if (err || !parent) {
       return res.status(400).json({
@@ -186,6 +247,7 @@ exports.remove = (req, res) => {
               //deletedCategory,
               message: "Category deleted successfully",
             });
+           
           })
           .catch((err) => {
             console.log(err);
@@ -195,7 +257,23 @@ exports.remove = (req, res) => {
         console.log(err);
       });
   });
-
+};
+const recursiveDeleter = (catIds, res, parentName) => {
+  return catIds.map((id) => {
+    Category.findById(id).exec((err, category) => {
+      if (err || !category) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+      console.log("found catgegory", category.subcats)
+      if (!category.subcats || category.subcats.length === 0) {
+        removeFast(category, res, parentName);
+        return;
+      }
+      return recursiveDeleter(category.subcats, res, parentName);
+    });
+  });
 };
 
 exports.update = (req, res) => {
@@ -210,11 +288,13 @@ exports.update = (req, res) => {
       });
     }
 
-    console.log("fields", fields);
-
     let category = req.category;
     category = lodash.extend(category, fields);
 
+    if (fields.recursiveCats) {
+      const recursiveCats = fields.recursiveCats.split(",");
+      category.recursiveCategories = recursiveCats;
+    }
     if (files.icon) {
       //console.log('Files icon: ', files.icon);
       //1kb = 1000
@@ -269,7 +349,7 @@ exports.update = (req, res) => {
                 }
 
                 newParent.subcats.push(result._id);
-                console.log("results", newParent);
+                //  console.log("results", newParent);
 
                 newParent
                   .save()
@@ -305,7 +385,8 @@ exports.items = (req, res) => {
   // console.log("req.catid", req.category._id)
   Category.findById(req.category._id)
     .select("-icon -thumbnail")
-     .populate("subcats", "-icon -thumbnail")
+    .populate("parent", "-icon -thumbnail")
+    .populate("subcats", "-icon -thumbnail")
     .exec((err, data) => {
       if (err) {
         return res.status(400).json({
@@ -318,6 +399,7 @@ exports.items = (req, res) => {
 
 exports.list = (req, res) => {
   Category.find({ trash: false })
+    .populate("parent", "-icon -thumbnail")
     .select("-icon -thumbnail")
     .exec((err, data) => {
       if (err) {
@@ -332,6 +414,7 @@ exports.list = (req, res) => {
 
 exports.tree = (req, res) => {
   Category.find({ trash: false })
+    .populate("parent", "-icon -thumbnail")
     .select("-icon -thumbnail")
     .sort("order")
     .exec((err, data) => {
@@ -354,7 +437,7 @@ exports.tree = (req, res) => {
           return;
         }
         // Use our mapping to locate the parent element in our data array
-        const parentEl = data[idMapping[el.parent]];
+        const parentEl = data[idMapping[el.parent._id]];
         // Add our current el to its parent's `children` array
         parentEl.children = [...(parentEl.children || []), el];
       });

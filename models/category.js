@@ -10,20 +10,29 @@ const categorySchema = new mongoose.Schema(
       maxlength: 32,
       unique: true,
     },
-    slug:{
-      type:String,
+    slug: {
+      type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     parent: { type: ObjectId, ref: "Category" },
-    children:{ 
+    children: {
       // used for only building tree, in the db there is no such a field, name children is not changeable
-      type: Object
+      type: Object,
     },
-    subcats:[{
-      type: ObjectId, ref: "Category"
-    }],
-    products:[{type:ObjectId, ref:"Product"}],
+    subcats: [
+      {
+        type: ObjectId,
+        ref: "Category",
+      },
+    ],
+    recursiveCategories: [
+      {
+        type: ObjectId,
+        ref: "Category",
+      },
+    ],
+    products: [{ type: ObjectId, ref: "Product" }],
     icon: {
       data: Buffer,
       contentType: String,
@@ -54,12 +63,10 @@ categorySchema
   .pre("findOne", autoPopulateChildren)
   .pre("find", autoPopulateChildren);*/
 
-
 // categorySchema.pre("remove", function (next) {
 //   // Remove all the assignment docs that reference the removed person.
 //   this.model("Category").remove({ childs: this._id }, next);
 // });
-
 
 // categorySchema.pre('deleteOne', function (next) {
 //     const categoryId = this.getQuery()["_id"];
@@ -73,7 +80,5 @@ categorySchema
 //       }
 //     });
 //   });
-
-
 
 module.exports = mongoose.model("Category", categorySchema);
