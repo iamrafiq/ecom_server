@@ -20,6 +20,7 @@ exports.create = (req, res) => {
 
     // check for all fields
 
+    console.log(fields)
     const { childs, name, order, slug, trash } = fields;
     if (!name) {
       return res.status(400).json({
