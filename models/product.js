@@ -3,13 +3,18 @@ const { ObjectId } = mongoose.Schema;
 
 const productSchema = new mongoose.Schema(
   {
-    productId: {
-      type: Number,
+    productCode: {
+      type: String,
       trim: true,
       required: true,
       maxlength: 32,
     },
     name: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    slug: {
       type: String,
       trim: true,
       required: true,
@@ -46,21 +51,62 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    shortDesc: {
-      type: String,
-      trim: true,
-      maxlength: 500,
+    
+    isAlwaysAvailable: {
+      type: Number,
+      default: 0,
     },
-    longDesc: {
-      type: String,
-      trim: true,
-      maxlength: 2000,
+    commonStock: {
+      type: Number,
+      default: 0,
     },
-    slug: {
-      type: String,
-      trim: true,
-      required: true,
+    preferredStock: {
+      type: Number,
+      default: 0,
     },
+    blockAtWarehouse: {
+      type: Number,
+      default: 0,
+    },
+    isPerishable: {
+      type: Number,
+      default: 0,
+    },
+    thirdPartyItem: {
+        type: Number,
+        default: 0,
+      },
+    earliestAvailabilityTime: {
+      type: String,
+      trim:true
+    },
+    availabilityCutOffTime: {
+      type: String,
+      trim:true
+    },
+ 
+      shortDesc: {
+        type: String,
+        trim: true,
+        maxlength: 500,
+      },
+      longDesc: {
+        type: String,
+        trim: true,
+        maxlength: 2000,
+      },
+    photosUrl: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    offerPhotosUrl: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
     categories: [
       {
         type: ObjectId,
@@ -81,53 +127,9 @@ const productSchema = new mongoose.Schema(
         ref: "Manufacturer",
       },
     ],
-    isAlwaysAvailable: {
-      type: Number,
-      default: 0,
-    },
-    commonStock: {
-      type: Number,
-      default: 0,
-    },
-    preferredStock: {
-      type: Number,
-      default: 0,
-    },
-    earliestAvailabilityTime: {
-      type: Date,
-      default: Date.now,
-    },
-    AvailabilityCutOffTime: {
-      type: Date,
-      default: Date.now,
-    },
-    blockAtWarehouse: {
-      type: Number,
-      default: 0,
-    },
-    isPerishable: {
-      type: Number,
-      default: 0,
-    },
-    thirdPartyItem: {
-        type: Number,
-        default: 0,
-      },
-    photosUrl: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-    offerPhotosUrl: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
     shipping: {
-      required: false,
-      type: Boolean,
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

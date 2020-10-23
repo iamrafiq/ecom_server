@@ -39,32 +39,38 @@ exports.create = (req, res) => {
 
     // check for all fields
 
-    const { name, description, price, category, quantity, shipping } = fields;
-    if (
-      !name ||
-      !description ||
-      !price ||
-      !category ||
-      !quantity ||
-      !shipping
-    ) {
-      return res.status(400).json({
-        error: "All fields are required",
-      });
-    }
+    // const { name, description, price, category, quantity, shipping } = fields;
+    // if (
+    //   !name ||
+    //   !description ||
+    //   !price ||
+    //   !category ||
+    //   !quantity ||
+    //   !shipping
+    // ) {
+    //   return res.status(400).json({
+    //     error: "All fields are required",
+    //   });
+    // }
+    // console.log("product...",fields);
+
     let product = new Product(fields);
 
-    if (files.photo) {
-      //console.log('Files photo: ', files.photo);
-      //1kb = 1000
-      //1mb = 1000000
-      if (files.photo.size > 1000000) {
-        return res.status(400).json({
-          error: "Image should be less than 1mb in size",
-        });
-      }
-      product.photo.data = fs.readFileSync(files.photo.path);
-      product.photo.contentType = files.photo.type;
+    if (fields.cats) {
+      const cats = fields.cats.split(",");
+      product.categories = cats;
+    }
+    if (fields.rc) {
+      const recursiveCats = fields.rc.split(",");
+      product.recursiveCategories = recursiveCats;
+    }
+    if (fields.photosUrl) {
+      const photosUrl = fields.photosUrl.split(",");
+      product.photosUrl = photosUrl;
+    }
+    if (fields.offerPhotosUrl) {
+      const offerPhotosUrl = fields.offerPhotosUrl.split(",");
+      product.offerPhotosUrl = offerPhotosUrl;
     }
 
     product.save((err, result) => {
