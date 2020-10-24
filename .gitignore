@@ -1,2 +1,13 @@
 node_modules
 .env
+*.wt
+*.lock
+/data/27017/WiredTiger
+/data/27017/WiredTiger.turtle
+/data/27017/storage.bson
+/data/27018/WiredTiger
+/data/27018/WiredTiger.turtle
+/data/27018/storage.bson
+/data/27019/WiredTiger
+/data/27019/WiredTiger.turtle
+/data/27019/storage.bson

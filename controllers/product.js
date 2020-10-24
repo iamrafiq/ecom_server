@@ -2,8 +2,12 @@ const formidable = require("formidable"); // for uploading image
 const lodash = require("lodash"); // for updating fields
 const fs = require("fs");
 const Product = require("../models/product");
+const Category = require("../models/category");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 //const { CallTracker } = require("assert");
+var mongoose = require("mongoose");
+let Parent = mongoose.model("Parent", { name: "string", size: "string" });
+let Child = mongoose.model("Child", { name: "string", size: "string" });
 
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
@@ -25,15 +29,32 @@ exports.read = (req, res) => {
   return res.json(req.product);
 };
 
+async function startNewSession() {
+  var conn = mongoose.connection;
+  // clean models
+  // await Promise.all(
+  //   Object.entries(conn.models).map(([k, m]) => m.deleteMany())
+  // );
+
+  let session = await conn.startSession();
+  session.startTransaction();
+
+  // Collections must exist in transactions
+  await Promise.all(
+    Object.entries(conn.models).map(([k, m]) => m.createCollection())
+  );
+
+  return session;
+}
+
 exports.create = (req, res) => {
-  console.log("Product Controller", req.body);
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
     if (err) {
       return status(400).json({
-        error: "Image could not be uploaded",
+        error: "form data parsing error",
       });
     }
 
@@ -59,6 +80,10 @@ exports.create = (req, res) => {
     if (fields.cats) {
       const cats = fields.cats.split(",");
       product.categories = cats;
+    } else {
+      return res.status(400).json({
+        error: "Please select categories of this product",
+      });
     }
     if (fields.rc) {
       const recursiveCats = fields.rc.split(",");
@@ -73,73 +98,165 @@ exports.create = (req, res) => {
       product.offerPhotosUrl = offerPhotosUrl;
     }
 
-    product.save((err, result) => {
-      if (err) {
-        return res.status(400).json({
-          error: errorHandler(err),
-        });
-      }
-
-      //result.photo ='undefined'; // not sending the imge back
-      res.json(result);
-    });
+    product
+      .save()
+      .then((result) => {
+        Category.updateMany(
+          { _id: { $in: product.categories } },
+          { $push: { products: result._id } }
+        )
+          .then((results) => {
+            res.json(result);
+          })
+          .catch((error) => {
+            return res.status(400).json({
+              error: errorHandler(error),
+            });
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   });
 };
-
 exports.remove = (req, res) => {
   let product = req.product;
-  product.remove((err, deletedProduct) => {
-    if (err) {
+  product
+    .remove()
+    .then((result) => {
+      var bulk = Category.collection.initializeUnorderedBulkOp();
+      bulk
+        .find({
+          products: result._id,
+        })
+        .update({ $pull: { products: result._id } }, { multi: true });
+
+      bulk.execute(() => {
+        res.json({
+          //result,
+          message: "Product deleted successfully",
+        });
+      });
+    })
+    .catch((error) => {
       return res.status(400).json({
         error: errorHandler(err),
       });
-    }
-
-    res.json({
-      //deletedProduct,
-      message: "Product deleted successfully",
     });
-  });
+  // product.remove((err, deletedProduct) => {
+  //   if (err) {
+  //     return res.status(400).json({
+  //       error: errorHandler(err),
+  //     });
+  //   }
+
+  //   res.json({
+  //     //deletedProduct,
+  //     message: "Product deleted successfully",
+  //   });
+  // });
 };
 
 exports.update = (req, res) => {
-  console.log("update.................");
+  console.log("update.....");
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
   form.parse(req, (err, fields, files) => {
     if (err) {
       return res.status(400).json({
-        error: "Image could not be uploaded",
+        error: "form data parsing error",
       });
     }
 
     let product = req.product;
     product = lodash.extend(product, fields);
-    console.log("Product", product);
-    // 1kb = 1000
-    // 1mb = 1000000
 
-    if (files.photo) {
-      // console.log("FILES PHOTO: ", files.photo);
-      if (files.photo.size > 1000000) {
-        return res.status(400).json({
-          error: "Image should be less than 1mb in size",
-        });
-      }
-      product.photo.data = fs.readFileSync(files.photo.path);
-      product.photo.contentType = files.photo.type;
+    if (fields.cats) {
+      const cats = fields.cats.split(",");
+      product.categories = cats;
+    }
+    if (fields.rc) {
+      const recursiveCats = fields.rc.split(",");
+      product.recursiveCategories = recursiveCats;
+    }
+    if (fields.photosUrl) {
+      const photosUrl = fields.photosUrl.split(",");
+      product.photosUrl = photosUrl;
+    }
+    if (fields.offerPhotosUrl) {
+      const offerPhotosUrl = fields.offerPhotosUrl.split(",");
+      product.offerPhotosUrl = offerPhotosUrl;
     }
 
-    product.save((err, result) => {
-      if (err) {
-        return res.status(400).json({
-          error: errorHandler(err),
+    product
+      .save()
+      .then((result) => {
+        var bulk = Category.collection.initializeUnorderedBulkOp();
+        bulk
+          .find({
+            products: result._id,
+          })
+          .update({ $pull: { products: result._id } }, { multi: true });
+
+        bulk.execute(() => {
+          Category.updateMany(
+            { _id: { $in: product.categories } },
+            { $push: { products: result._id } }
+          )
+            .then((results) => {
+              res.json(result);
+            })
+            .catch((error) => {
+              return res.status(400).json({
+                error: errorHandler(error),
+              });
+            });
         });
-      }
-      res.json(result);
-    });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   });
 };
+
+// exports.update = (req, res) => {
+//   console.log("update.................");
+//   let form = new formidable.IncomingForm();
+//   form.keepExtensions = true;
+//   form.parse(req, (err, fields, files) => {
+//     if (err) {
+//       return res.status(400).json({
+//         error: "Image could not be uploaded",
+//       });
+//     }
+
+//     let product = req.product;
+//     product = lodash.extend(product, fields);
+//     console.log("Product", product);
+//     // 1kb = 1000
+//     // 1mb = 1000000
+
+//     if (files.photo) {
+//       // console.log("FILES PHOTO: ", files.photo);
+//       if (files.photo.size > 1000000) {
+//         return res.status(400).json({
+//           error: "Image should be less than 1mb in size",
+//         });
+//       }
+//       product.photo.data = fs.readFileSync(files.photo.path);
+//       product.photo.contentType = files.photo.type;
+//     }
+
+//     product.save((err, result) => {
+//       if (err) {
+//         return res.status(400).json({
+//           error: errorHandler(err),
+//         });
+//       }
+//       res.json(result);
+//     });
+//   });
+// };
 
 /**
  * sell / arrival
@@ -315,7 +432,7 @@ exports.decreaseQuantity = (req, res, next) => {
 
 exports.productsByCategory = (req, res) => {
   //create query object to hold search value and category value
-  console.log("....", req.params.categoryId)
+  console.log("....", req.params.categoryId);
   const query = {};
   if (req.query.category) {
     query.category = req.query.category;

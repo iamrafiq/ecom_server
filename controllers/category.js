@@ -1,4 +1,5 @@
 const Category = require("../models/category");
+const Product = require("../models/product");
 const lodash = require("lodash"); // for updating fields
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const formidable = require("formidable"); // for uploading image
@@ -20,7 +21,7 @@ exports.create = (req, res) => {
 
     // check for all fields
 
-    console.log(fields)
+    console.log(fields);
     const { childs, name, order, slug, trash } = fields;
     if (!name) {
       return res.status(400).json({
@@ -80,6 +81,9 @@ exports.create = (req, res) => {
       .save()
       .then((result) => {
         //add  the sub cat id to its parent
+        if (result.name === "root") {
+          res.json(result);
+        }
         Category.findById(result.parent).exec((err, parent) => {
           if (err || !parent) {
             return res.status(400).json({
@@ -209,7 +213,7 @@ exports.read = (req, res) => {
 
 exports.remove = (req, res) => {
   console.log("remove called");
-  let category = req.category; //add the the sub cat id to new parents
+  let category = req.category;
   console.log("remove called", category.subcats);
 
   if (!category.subcats || category.subcats.length === 0) {
@@ -218,7 +222,7 @@ exports.remove = (req, res) => {
     return res.status(400).json({
       error: "Delete all subcategories at first",
     });
-   // recursiveDeleter(category.subcats, res, category.name);
+    // recursiveDeleter(category.subcats, res, category.name);
   }
 };
 
@@ -244,11 +248,19 @@ const removeFast = (category, res, parentName) => {
         category
           .remove()
           .then((result2) => {
-            res.json({
-              //deletedCategory,
-              message: "Category deleted successfully",
+            var bulk = Product.collection.initializeUnorderedBulkOp();
+            bulk
+              .find({
+                categories: category._id,
+              })
+              .update({ $pull: { categories: category._id } }, { multi: true });
+
+            bulk.execute(() => {
+              res.json({
+                //result,
+                message: "Category deleted successfully",
+              });
             });
-           
           })
           .catch((err) => {
             console.log(err);
@@ -267,7 +279,7 @@ const recursiveDeleter = (catIds, res, parentName) => {
           error: errorHandler(err),
         });
       }
-      console.log("found catgegory", category.subcats)
+      console.log("found catgegory", category.subcats);
       if (!category.subcats || category.subcats.length === 0) {
         removeFast(category, res, parentName);
         return;
@@ -399,7 +411,7 @@ exports.items = (req, res) => {
 };
 
 exports.list = (req, res) => {
-  Category.find({ trash: false })
+  Category.find()
     .populate("parent", "-icon -thumbnail")
     .select("-icon -thumbnail")
     .exec((err, data) => {
@@ -414,7 +426,7 @@ exports.list = (req, res) => {
 };
 
 exports.tree = (req, res) => {
-  Category.find({ trash: false })
+  Category.find()
     .populate("parent", "-icon -thumbnail")
     .select("-icon -thumbnail")
     .sort("order")
@@ -443,7 +455,11 @@ exports.tree = (req, res) => {
         parentEl.children = [...(parentEl.children || []), el];
       });
 
-      res.json(root.children);
+      if (root.children) {
+        res.json(root.children);
+      } else {
+        res.json(root);
+      }
     });
 };
 

@@ -6,21 +6,28 @@ const productSchema = new mongoose.Schema(
     productCode: {
       type: String,
       trim: true,
-      required: true,
+      // required: true,
+    //  unique:true,
       maxlength: 32,
     },
     name: {
       type: String,
       trim: true,
-      required: true,
+      // required: true,
+         //  unique:true,
+
     },
     slug: {
       type: String,
       trim: true,
-      required: true,
+      // required: true,
+          //  unique:true,
+
     },
     bengaliName: {
       type: String,
+      // required: true,
+          //  unique:true,
       trim: true,
     },
     nameWithOutSubText: {
@@ -33,15 +40,15 @@ const productSchema = new mongoose.Schema(
     },
     mrp: {
       type: Number,
-      required: true,
+      // required: true,
     },
     price: {
       type: Number,
-      required: true,
+      // required: true,
     },
     cropPrice: {
       type: Number,
-      required: true,
+      // required: true,
     },
     applyDiscounts: {
       type: Number,
