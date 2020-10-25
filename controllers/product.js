@@ -287,6 +287,21 @@ exports.list = (req, res) => {
     });
 };
 
+exports.getAllProducts = (req, res) => {
+  let order = req.query.order ? req.query.order : "asc";
+  Product.find()
+    .select("-photo -category") 
+    .sort([[order]])
+    .exec((err, products) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Products not found",
+        });
+      }
+      res.json(products);
+    });
+};
+
 /**
  * it will find the products based on the req product category
  * other products that has the same category, will be returned,
