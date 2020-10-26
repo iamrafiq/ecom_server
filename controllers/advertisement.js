@@ -14,11 +14,11 @@ exports.create = (req, res) => {
         error: JSON.stringify(err),
       });
     }
-
     let advertisement = new Advertisement(fields);
 
     if (fields.slugPages) {
-      const slugPages = fields.slugPages.split(",");
+      console.log("slugssss...", fields.slugPages)
+      let slugPages = fields.slugPages.split(",");
       advertisement.slugPages = slugPages;
     }
 
@@ -52,7 +52,7 @@ exports.advertisementById = (req, res, next, id) => {
       next();
     });
 };
-exports.readBySlug = (req, res) => {
+exports.read = (req, res) => {
   res.json(req.advertisement);
 };
 exports.advertisementsBySlug = (req, res, next, slug) => {

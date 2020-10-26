@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const {create, advertisementsBySlug , readBySlug, advertisementById,  remove, update, list} = require('../controllers/advertisement');
+const {create, advertisementsBySlug , read, advertisementById,  remove, update, list} = require('../controllers/advertisement');
 const {requireSignin, isAuth, isAdmin} = require('../controllers/auth');
 const {userById} = require('../controllers/user');
 
-router.get('/advertisements/:advertisementSlug', readBySlug);
+router.get('/advertisements/:advertisementSlug', read);
+
+router.get('/advertisement/:advertisementId', read);
 
 router.post('/advertisement/create/:userId', requireSignin, isAuth, isAdmin,  create);
 
