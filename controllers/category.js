@@ -402,7 +402,13 @@ exports.items = (req, res) => {
     .populate("parent", "-icon -thumbnail")
     .populate("subcats", "-icon -thumbnail")
     .populate("products")
-    .populate("recursiveCategories", "-icon -thumbnail")
+    .populate({
+      path: 'recursiveCategories',
+      select: { 'icon': 0,'thumbnail':0},
+      options: { sort: { 'order': 1 } }})
+    //.populate({path: 'recursiveCategories', options: { sort: { 'order': -1 } }})
+    //.populate("recursiveCategories", "-icon -thumbnail")
+    
     .exec((err, data) => {
       if (err) {
         return res.status(400).json({
