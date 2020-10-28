@@ -42,18 +42,18 @@ exports.advertisementById = (req, res, next, id) => {
 
   Advertisement.findById(id)
     .populate("parent", "-icon -thumbnail")
-    .exec((err, advertisement) => {
-      if (err || !advertisement) {
+    .exec((err, advertisements) => {
+      if (err || !advertisements) {
         return res.status(400).json({
           error: errorHandler(err),
         });
       }
-      req.advertisement = advertisement;
+      req.advertisements = advertisements;
       next();
     });
 };
 exports.read = (req, res) => {
-  res.json(req.advertisement);
+  res.json(req.advertisements);
 };
 exports.advertisementsBySlug = (req, res, next, slug) => {
   console.log("categoryBySlug", slug);
@@ -66,14 +66,14 @@ exports.advertisementsBySlug = (req, res, next, slug) => {
           error: errorHandler(err),
         });
       }
-      req.advertisement = data;
+      req.advertisements = data;
       next();
     });
 };
 
 exports.remove = (req, res) => {
   console.log("remove called");
-  let advertisement = req.advertisement;
+  let advertisement = req.advertisements;
   advertisement
     .remove()
     .then((result) => {
@@ -102,7 +102,7 @@ exports.update = (req, res) => {
       });
     }
 
-    let advertisement = req.advertisement;
+    let advertisement = req.advertisements;
     advertisement = lodash.extend(advertisement, fields);
 
     if (fields.slugPages) {

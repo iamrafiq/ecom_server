@@ -134,6 +134,12 @@ const productSchema = new mongoose.Schema(
         ref: "Manufacturer",
       },
     ],
+    advertisements: [
+      {
+        // used for only loading advertisments if this product content loaded in a page, in the db there is no such a field, name advertisements is not changeable
+        type: Object,
+      },
+    ],
     shipping: {
       type: Number,
       default: 0,

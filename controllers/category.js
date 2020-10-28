@@ -415,6 +415,7 @@ exports.items = (req, res) => {
           error: errorHandler(err),
         });
       }
+      data.advertisements = req.advertisements;
       res.json(data);
     });
 };
@@ -434,20 +435,20 @@ exports.list = (req, res) => {
     });
 };
 
-exports.categoriesWithProducts = (req, res) => {
-  Category.find()
-    .populate("products")
-    .select("-icon -thumbnail")
-    .exec((err, data) => {
-      if (err) {
-        return res.status(400).json({
-          error: errorHandler(err),
-        });
-      }
+// exports.categoriesWithProducts = (req, res) => {
+//   Category.find()
+//     .populate("products")
+//     .select("-icon -thumbnail")
+//     .exec((err, data) => {
+//       if (err) {
+//         return res.status(400).json({
+//           error: errorHandler(err),
+//         });
+//       }
 
-      res.json(data);
-    });
-};
+//       res.json(data);
+//     });
+// };
 
 exports.tree = (req, res) => {
   Category.find()

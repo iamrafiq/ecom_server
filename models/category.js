@@ -27,6 +27,12 @@ const categorySchema = new mongoose.Schema(
       // used for only building tree, in the db there is no such a field, name children is not changeable
       type: Object,
     },
+    advertisements: [
+      {
+        // used for only loading advertisments if this category content loaded in a page, in the db there is no such a field, name advertisements is not changeable
+        type: Object,
+      },
+    ],
     subcats: [
       {
         type: ObjectId,
@@ -54,6 +60,10 @@ const categorySchema = new mongoose.Schema(
 
     trash: {
       type: Boolean,
+    },
+    active: {
+      type: Boolean,
+      default:false
     },
   },
   { timestamps: true }
