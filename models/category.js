@@ -63,7 +63,6 @@ const categorySchema = new mongoose.Schema(
     },
     active: {
       type: Boolean,
-      default:false
     },
   },
   { timestamps: true }

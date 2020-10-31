@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema(
     //  unique:true,
       maxlength: 32,
     },
-    name: {
+    name: { 
       type: String,
       trim: true,
       // required: true,
@@ -39,6 +39,7 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
     mrp: {
+      // original body price
       type: Number,
       // required: true,
     },
@@ -54,7 +55,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    blockSale: {
+    blockSale: { 
       type: Number,
       default: 0,
     },
@@ -67,7 +68,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    preferredStock: {
+    preferredStock: { 
       type: Number,
       default: 0,
     },
@@ -83,11 +84,11 @@ const productSchema = new mongoose.Schema(
         type: Number,
         default: 0,
       },
-    earliestAvailabilityTime: {
+    earliestAvailabilityTime: { 
       type: String,
       trim:true
     },
-    availabilityCutOffTime: {
+    availabilityCutOffTime: { 
       type: String,
       trim:true
     },
