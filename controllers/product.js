@@ -12,6 +12,7 @@ let Child = mongoose.model("Child", { name: "string", size: "string" });
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category")
+    .populate("relatedProducts")
     .exec((err, product) => {
       if (err || !product || product.length <= 0) {
         return res.status(400).json({
@@ -48,6 +49,7 @@ async function startNewSession() {
 }
 
 exports.create = (req, res) => {
+
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
   form.parse(req, (err, fields, files) => {
@@ -73,7 +75,7 @@ exports.create = (req, res) => {
     //     error: "All fields are required",
     //   });
     // }
-    // console.log("product...",fields);
+     console.log("product...",fields);
 
     let product = new Product(fields);
 
@@ -97,7 +99,11 @@ exports.create = (req, res) => {
       const offerPhotosUrl = fields.offerPhotosUrl.split(",");
       product.offerPhotosUrl = offerPhotosUrl;
     }
-
+    if (fields.relatedProducts) {
+      const relatedProducts = fields.relatedProducts.split(",");
+      product.relatedProducts = relatedProducts;
+    }
+    
     product
       .save()
       .then((result) => {
@@ -187,7 +193,10 @@ exports.update = (req, res) => {
       const offerPhotosUrl = fields.offerPhotosUrl.split(",");
       product.offerPhotosUrl = offerPhotosUrl;
     }
-
+    if (fields.relatedProducts) {
+      const relatedProducts = fields.relatedProducts.split(",");
+      product.relatedProducts = relatedProducts;
+    }
     product
       .save()
       .then((result) => {

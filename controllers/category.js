@@ -394,7 +394,7 @@ exports.update = (req, res) => {
   });
 };
 
-exports.items = (req, res) => {
+exports.getAllProductsOfACategory = (req, res) => {
   //  res.json(req.category);
   // console.log("req.catid", req.category._id)  
   Category.findById(req.category._id)
@@ -503,19 +503,3 @@ exports.thumbnail = (req, res, next) => {
   next();
 };
 
-exports.getAllProducts = (req, res) => {
-  //create query object to hold search value and category value
-  console.log("....", req.params.categoryId);
-
-  Category.find(req.category._id, (err, products) => {
-    console.log(err);
-    if (err) {
-      return res.status(400).json({
-        error: err,
-      });
-    }
-    res.json(products);
-  })
-    .populate("products", "-photo")
-    .select("-photo");
-};

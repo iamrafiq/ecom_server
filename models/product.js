@@ -115,6 +115,12 @@ const productSchema = new mongoose.Schema(
         trim: true,
       },
     ],
+    relatedProducts: [
+      {
+        type: ObjectId,
+        ref: "Product",
+      },
+    ],
     categories: [
       {
         type: ObjectId,
