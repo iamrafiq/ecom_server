@@ -1,0 +1,4 @@
+1.give option to remove image from updating category (remove button for each image file), 
+if user remove a image by pressing the delete button delete image from the server. 
+other wise in current system if I uploaded an image wile creating a category it can not be removable 
+by using update option

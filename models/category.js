@@ -46,14 +46,28 @@ const categorySchema = new mongoose.Schema(
       },
     ],
     products: [{ type: ObjectId, ref: "Product" }],
+    iconMenu: {
+      fileName: String,
+      contentType: String,
+
+
+    },
     icon: {
-      data: Buffer,
+      fileName: String,
       contentType: String,
     },
     thumbnail: {
-      data: Buffer,
+      fileName: String,
       contentType: String,
     },
+    // icon: {
+    //   data: Buffer,
+    //   contentType: String,
+    // },
+    // thumbnail: {
+    //   data: Buffer,
+    //   contentType: String,
+    // },
     order: {
       type: Number,
     },

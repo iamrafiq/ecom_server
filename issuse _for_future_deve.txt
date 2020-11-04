@@ -1,0 +1,2 @@
+1. While uploading file check the uploads dirictory dose exsits if not then create it then save the file
+uses: automatically create dirictory for client by using there web site name then save file separately.

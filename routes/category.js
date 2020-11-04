@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {create, categoryById, categoryBySlug, read, remove, update, list, tree, children,getAllProductsOfACategory,  icon, thumbnail} = require('../controllers/category');
+const {create, categoryById, categoryBySlug, read, remove, update, list, tree, children,getAllProductsOfACategory, iconMenu,  image, thumbnail} = require('../controllers/category');
 const {advertisementsBySlug } = require('../controllers/advertisement');
 
 const {requireSignin, isAuth, isAdmin} = require('../controllers/auth');
@@ -20,10 +20,15 @@ router.get('/categories/',  list);
 // router.get('/categories-with-products/',  categoriesWithProducts);
 
 router.get('/categories/tree',  tree);
-router.get('/category/icon/:categoryId', icon)
+router.get(`/image`, image)
 
-router.get('/category/thumbnail/:categoryId', thumbnail)
+// router.get(`/images/icon-menu/:categoryId`, iconMenu)
+// router.get(`/images/icon/:categoryId`, icon)
+// router.get(`/images/thumbnail/:categoryId`, thumbnail)
 
+// router.get('/category/icon/:categoryId', icon)
+
+// router.get('/category/thumbnail/:categoryId', thumbnail)
 router.param('slug', categoryBySlug);
 router.param('categoryId', categoryById);
 router.param('userId', userById);

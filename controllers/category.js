@@ -8,9 +8,18 @@ const { findById } = require("../models/category");
 const { result } = require("lodash");
 
 exports.create = (req, res) => {
-  console.log("Category Create", req.body);
+  let clientDir = `./${process.env.CLIENT_NAME}`;
+  if (!fs.existsSync(clientDir)) {
+    fs.mkdirSync(clientDir);
+  }
+  clientDir = `./${process.env.CLIENT_NAME}/images`;
+  if (!fs.existsSync(clientDir)) {
+    fs.mkdirSync(clientDir);
+  }
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
+  form.uploadDir = clientDir;
+  // form.multiples = true;
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
     if (err) {
@@ -53,6 +62,17 @@ exports.create = (req, res) => {
       category.recursiveCategories = recursiveCats;
     }
 
+    if (files.iconMenu) {
+      //1kb = 1000
+      //1mb = 1000000
+      if (files.iconMenu.size > 200000000) {
+        return res.status(400).json({
+          error: "Image should be less than 2kb in size",
+        });
+      }
+      category.iconMenu.fileName = files.iconMenu.path.split("/")[2];
+      category.iconMenu.contentType = files.iconMenu.type;
+    }
     if (files.icon) {
       //1kb = 1000
       //1mb = 1000000
@@ -61,8 +81,11 @@ exports.create = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      category.icon.data = fs.readFileSync(files.icon.path);
+      console.log("image path:", files.icon.path);
+      category.icon.fileName = files.icon.path.split("/")[2];
       category.icon.contentType = files.icon.type;
+      // category.icon.data = fs.readFileSync(files.icon.path);
+      // category.icon.contentType = files.icon.type;
     }
     if (files.thumbnail) {
       //console.log('Files icon: ', files.icon);
@@ -73,8 +96,10 @@ exports.create = (req, res) => {
           error: "Image should be less than 250kb in size",
         });
       }
-      category.thumbnail.data = fs.readFileSync(files.thumbnail.path);
+      category.thumbnail.fileName = files.thumbnail.path.split("/")[2];
       category.thumbnail.contentType = files.thumbnail.type;
+      // category.thumbnail.data = fs.readFileSync(files.thumbnail.path);
+      // category.thumbnail.contentType = files.thumbnail.type;
     }
 
     category
@@ -92,7 +117,7 @@ exports.create = (req, res) => {
           }
 
           parent.subcats.push(result._id);
-          console.log("results", parent);
+          // console.log("results", parent);
 
           parent
             .save()
@@ -113,7 +138,7 @@ exports.create = (req, res) => {
 
 exports.checkBySlug = (slug) => {
   Category.find({ slug: slug })
-    .select("-icon -thumbnail")
+    // .select("-icon -thumbnail")
     .exec((err, category) => {
       if (err) {
         return res.status(400).json({
@@ -128,7 +153,7 @@ exports.categoryById = (req, res, next, id) => {
   console.log("categoryById", id);
 
   Category.findById(id)
-    .populate("parent", "-icon -thumbnail")
+    .populate("parent")
     .exec((err, category) => {
       if (err || !category) {
         return res.status(400).json({
@@ -143,8 +168,8 @@ exports.categoryById = (req, res, next, id) => {
 exports.categoryBySlug = (req, res, next, slug) => {
   console.log("categoryBySlug", slug);
   Category.findOne({ slug: slug })
-    .select("-icon -thumbnail")
-    .populate("parent", "-icon -thumbnail")
+    // .select("-icon -thumbnail")
+    .populate("parent")
     .lean()
     .exec((err, category) => {
       if (err || !category) {
@@ -159,8 +184,8 @@ exports.categoryBySlug = (req, res, next, slug) => {
 
 exports.children = (req, res, next) => {
   Category.find({ parent: req.category._id })
-    .populate("parent", "-icon -thumbnail")
-    .select("-icon -thumbnail")
+    .populate("parent")
+    // .select("-icon -thumbnail")
     .exec((err, categoris) => {
       if (err) {
         return res.status(400).json({
@@ -213,9 +238,9 @@ exports.read = (req, res) => {
 // };
 
 exports.remove = (req, res) => {
-  console.log("remove called");
+  // console.log("remove called");
   let category = req.category;
-  console.log("remove called", category.subcats);
+  // console.log("remove called", category.subcats);
 
   if (!category.subcats || category.subcats.length === 0) {
     removeFast(category, res, category.name);
@@ -228,7 +253,7 @@ exports.remove = (req, res) => {
 };
 
 const removeFast = (category, res, parentName) => {
-  console.log("remove fast cat", category);
+  // console.log("remove fast cat", category);
 
   Category.findById(category.parent).exec((err, parent) => {
     if (err || !parent) {
@@ -277,10 +302,10 @@ const recursiveDeleter = (catIds, res, parentName) => {
     Category.findById(id).exec((err, category) => {
       if (err || !category) {
         return res.status(400).json({
-          error: errorHandler(err),
+          error: errorHandl / category / er(err),
         });
       }
-      console.log("found catgegory", category.subcats);
+      // console.log("found catgegory", category.subcats);
       if (!category.subcats || category.subcats.length === 0) {
         removeFast(category, res, parentName);
         return;
@@ -291,8 +316,17 @@ const recursiveDeleter = (catIds, res, parentName) => {
 };
 
 exports.update = (req, res) => {
+  let clientDir = `./${process.env.CLIENT_NAME}`;
+  if (!fs.existsSync(clientDir)) {
+    fs.mkdirSync(clientDir);
+  }
+  clientDir = `./${process.env.CLIENT_NAME}/images`;
+  if (!fs.existsSync(clientDir)) {
+    fs.mkdirSync(clientDir);
+  }
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
+  form.uploadDir = clientDir;
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
     console.log(err);
@@ -309,8 +343,58 @@ exports.update = (req, res) => {
       const recursiveCats = fields.recursiveCats.split(",");
       category.recursiveCategories = recursiveCats;
     }
+    // if (files.icon) {
+    //   //console.log('Files icon: ', files.icon);
+    //   //1kb = 1000
+    //   //1mb = 1000000
+    //   if (files.icon.size > 200000000) {
+    //     return res.status(400).json({
+    //       error: "Image should be less than 2kb in size",
+    //     });
+    //   }
+    //   category.icon.data = fs.readFileSync(files.icon.path);
+    //   category.icon.contentType = files.icon.type;
+    // }
+    // if (files.thumbnail) {
+    //   //console.log('Files icon: ', files.icon);
+    //   //1kb = 1000
+    //   //1mb = 1000000
+    //   if (files.thumbnail.size > 2500000000) {
+    //     return res.status(400).json({
+    //       error: "Image should be less than 250kb in size",
+    //     });
+    //   }
+    //   category.thumbnail.data = fs.readFileSync(files.thumbnail.path);
+    //   category.thumbnail.contentType = files.thumbnail.type;
+    // }
+
+    if (files.iconMenu) {
+      //1kb = 1000
+      //1mb = 1000000
+      console.log(
+        "iconMenu",
+        `./${process.env.CLIENT_NAME}/images/${req.category.iconMenu.fileName}`
+      );
+      if (files.iconMenu.size > 200000000) {
+        return res.status(400).json({
+          error: "Image should be less than 2kb in size",
+        });
+      }
+      const path = `./${process.env.CLIENT_NAME}/images/${req.category.iconMenu.fileName}`;
+      if (fs.existsSync(path)) {
+        try {
+          fs.unlinkSync(path, function (err) {
+            console.log("error unlink", err);
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+      category.iconMenu.fileName = files.iconMenu.path.split("/")[2];
+      category.iconMenu.contentType = files.iconMenu.type;
+    }
     if (files.icon) {
-      //console.log('Files icon: ', files.icon);
       //1kb = 1000
       //1mb = 1000000
       if (files.icon.size > 200000000) {
@@ -318,7 +402,19 @@ exports.update = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      category.icon.data = fs.readFileSync(files.icon.path);
+
+      const path = `./${process.env.CLIENT_NAME}/images/${req.category.icon.fileName}`;
+      if (fs.existsSync(path)) {
+        try {
+          fs.unlinkSync(path, function (err) {
+            console.log("error unlink", err);
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+      category.icon.fileName = files.icon.path.split("/")[2];
       category.icon.contentType = files.icon.type;
     }
     if (files.thumbnail) {
@@ -330,10 +426,20 @@ exports.update = (req, res) => {
           error: "Image should be less than 250kb in size",
         });
       }
-      category.thumbnail.data = fs.readFileSync(files.thumbnail.path);
+      const path = `./${process.env.CLIENT_NAME}/images/${req.category.thumbnail.fileName}`;
+      if (fs.existsSync(path)) {
+        try {
+          fs.unlinkSync(path, function (err) {
+            console.log("error unlink", err);
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+      category.thumbnail.fileName = files.thumbnail.path.split("/")[2];
       category.thumbnail.contentType = files.thumbnail.type;
     }
-
     category
       .save()
       .then((result) => {
@@ -396,19 +502,20 @@ exports.update = (req, res) => {
 
 exports.getAllProductsOfACategory = (req, res) => {
   //  res.json(req.category);
-  // console.log("req.catid", req.category._id)  
+  // console.log("req.catid", req.category._id)
   Category.findById(req.category._id)
-    .select("-icon -thumbnail")
-    .populate("parent", "-icon -thumbnail")
-    .populate("subcats", "-icon -thumbnail")
+    // .select("-icon -thumbnail")
+    .populate("parent")
+    .populate("subcats")
     .populate("products")
     .populate({
-      path: 'recursiveCategories',
-      select: { 'icon': 0,'thumbnail':0},
-      options: { sort: { 'order': 1 } }})
+      path: "recursiveCategories",
+      select: { icon: 0, thumbnail: 0 },
+      options: { sort: { order: 1 } },
+    })
     //.populate({path: 'recursiveCategories', options: { sort: { 'order': -1 } }})
     //.populate("recursiveCategories", "-icon -thumbnail")
-    
+
     .exec((err, data) => {
       if (err) {
         return res.status(400).json({
@@ -422,8 +529,8 @@ exports.getAllProductsOfACategory = (req, res) => {
 
 exports.list = (req, res) => {
   Category.find()
-    .populate("parent", "-icon -thumbnail")
-    .select("-icon -thumbnail")
+    .populate("parent")
+    // .select("-icon -thumbnail")
     .exec((err, data) => {
       if (err) {
         return res.status(400).json({
@@ -452,8 +559,8 @@ exports.list = (req, res) => {
 
 exports.tree = (req, res) => {
   Category.find()
-    .populate("parent", "-icon -thumbnail")
-    .select("-icon -thumbnail")
+    .populate("parent")
+    // .select("-icon -thumbnail")
     .sort("order")
     .exec((err, data) => {
       if (err) {
@@ -488,18 +595,33 @@ exports.tree = (req, res) => {
     });
 };
 
-exports.icon = (req, res, next) => {
-  if (req.category.icon.data) {
-    res.set("Content-Type", req.category.icon.contentType);
-    return res.send(req.category.icon.data);
-  }
-  next();
+exports.image = (req, res) => {
+  console.log("image call");
+  let imageName = `${process.env.CLIENT_NAME}/images/${req.query.image_name}`;
+  fs.readFile(imageName, (err, imageData) => {
+    if (err) {
+      return res.status(400).json({
+        error: errorHandler(err),
+      });
+    }
+    res.writeHead(200, {
+      "Content-Type": "image/webp",
+    });
+    res.end(imageData);
+  });
 };
-exports.thumbnail = (req, res, next) => {
-  if (req.category.thumbnail.data) {
-    res.set("Content-Type", req.category.thumbnail.contentType);
-    return res.send(req.category.thumbnail.data);
-  }
-  next();
-};
+// exports.thumbnail = (req, res, next) => {
+//   if (req.category.thumbnail.data) {
+//     res.set("Content-Type", req.category.thumbnail.contentType);
+//     return res.send(req.category.thumbnail.data);
+//   }
+//   next();
+// };
 
+// exports.iconMenu = (req, res, next) => {
+//   if (req.category.thumbnail.fileName) {
+//     res.set("Content-Type", req.category.thumbnail.contentType);
+//     return res.send(req.category.thumbnail.fileName);
+//   }
+//   next();
+// };
