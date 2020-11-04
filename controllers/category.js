@@ -7,7 +7,7 @@ const fs = require("fs");
 const { findById } = require("../models/category");
 const { result } = require("lodash");
 
-exports.create = (req, res) => {
+const initClinentDir = () =>{
   let clientDir = `./${process.env.CLIENT_NAME}`;
   if (!fs.existsSync(clientDir)) {
     fs.mkdirSync(clientDir);
@@ -16,9 +16,13 @@ exports.create = (req, res) => {
   if (!fs.existsSync(clientDir)) {
     fs.mkdirSync(clientDir);
   }
+  return clientDir;
+}
+exports.create = (req, res) => {
+ 
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
-  form.uploadDir = clientDir;
+  form.uploadDir = initClinentDir();
   // form.multiples = true;
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
@@ -30,7 +34,6 @@ exports.create = (req, res) => {
 
     // check for all fields
 
-    console.log(fields);
     const { childs, name, order, slug, trash } = fields;
     if (!name) {
       return res.status(400).json({
@@ -200,42 +203,6 @@ exports.read = (req, res) => {
   return res.json(req.category);
 };
 
-// exports.remove = (req, res) => {
-//   console.log("remove called");
-//   let category = req.category; //add the the sub cat id to new parents
-//   Category.findById(category.parent).exec((err, parent) => {
-//     if (err || !parent) {
-//       return res.status(400).json({
-//         error: errorHandler(err),
-//       });
-//     }
-
-//     const index = parent.subcats.indexOf(category._id);
-//     if (index > -1) {
-//       parent.subcats.splice(index, 1);
-//     }
-
-//     parent
-//       .save()
-//       .then((result1) => {
-//         console.log(result1);
-//         category
-//           .remove()
-//           .then((result2) => {
-//             res.json({
-//               //deletedCategory,
-//               message: "Category deleted successfully",
-//             });
-//           })
-//           .catch((err) => {
-//             console.log(err);
-//           });
-//       })
-//       .catch((err) => {
-//         console.log(err);
-//       });
-//   });
-// };
 
 exports.remove = (req, res) => {
   // console.log("remove called");
@@ -274,6 +241,10 @@ const removeFast = (category, res, parentName) => {
         category
           .remove()
           .then((result2) => {
+            unlinkStaticFile(result2.iconMenu.fileName);
+            unlinkStaticFile(result2.icon.fileName);
+            unlinkStaticFile(result2.thumbnail.fileName);
+
             var bulk = Product.collection.initializeUnorderedBulkOp();
             bulk
               .find({
@@ -316,17 +287,9 @@ const recursiveDeleter = (catIds, res, parentName) => {
 };
 
 exports.update = (req, res) => {
-  let clientDir = `./${process.env.CLIENT_NAME}`;
-  if (!fs.existsSync(clientDir)) {
-    fs.mkdirSync(clientDir);
-  }
-  clientDir = `./${process.env.CLIENT_NAME}/images`;
-  if (!fs.existsSync(clientDir)) {
-    fs.mkdirSync(clientDir);
-  }
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
-  form.uploadDir = clientDir;
+  form.uploadDir = initClinentDir();
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
     console.log(err);
@@ -343,30 +306,6 @@ exports.update = (req, res) => {
       const recursiveCats = fields.recursiveCats.split(",");
       category.recursiveCategories = recursiveCats;
     }
-    // if (files.icon) {
-    //   //console.log('Files icon: ', files.icon);
-    //   //1kb = 1000
-    //   //1mb = 1000000
-    //   if (files.icon.size > 200000000) {
-    //     return res.status(400).json({
-    //       error: "Image should be less than 2kb in size",
-    //     });
-    //   }
-    //   category.icon.data = fs.readFileSync(files.icon.path);
-    //   category.icon.contentType = files.icon.type;
-    // }
-    // if (files.thumbnail) {
-    //   //console.log('Files icon: ', files.icon);
-    //   //1kb = 1000
-    //   //1mb = 1000000
-    //   if (files.thumbnail.size > 2500000000) {
-    //     return res.status(400).json({
-    //       error: "Image should be less than 250kb in size",
-    //     });
-    //   }
-    //   category.thumbnail.data = fs.readFileSync(files.thumbnail.path);
-    //   category.thumbnail.contentType = files.thumbnail.type;
-    // }
 
     if (files.iconMenu) {
       //1kb = 1000
@@ -380,16 +319,18 @@ exports.update = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      const path = `./${process.env.CLIENT_NAME}/images/${req.category.iconMenu.fileName}`;
-      if (fs.existsSync(path)) {
-        try {
-          fs.unlinkSync(path, function (err) {
-            console.log("error unlink", err);
-          });
-        } catch (err) {
-          console.log(err);
-        }
-      }
+      // const path = `./${process.env.CLIENT_NAME}/images/${req.category.iconMenu.fileName}`;
+      // if (fs.existsSync(path)) {
+      //   try {
+      //     fs.unlinkSync(path, function (err) {
+      //       console.log("error unlink", err);
+      //     });
+      //   } catch (err) {
+      //     console.log(err);
+      //   }
+      // }
+
+      unlinkStaticFile(req.category.iconMenu.fileName);
 
       category.iconMenu.fileName = files.iconMenu.path.split("/")[2];
       category.iconMenu.contentType = files.iconMenu.type;
@@ -403,16 +344,7 @@ exports.update = (req, res) => {
         });
       }
 
-      const path = `./${process.env.CLIENT_NAME}/images/${req.category.icon.fileName}`;
-      if (fs.existsSync(path)) {
-        try {
-          fs.unlinkSync(path, function (err) {
-            console.log("error unlink", err);
-          });
-        } catch (err) {
-          console.log(err);
-        }
-      }
+      unlinkStaticFile(req.category.icon.fileName);
 
       category.icon.fileName = files.icon.path.split("/")[2];
       category.icon.contentType = files.icon.type;
@@ -426,17 +358,7 @@ exports.update = (req, res) => {
           error: "Image should be less than 250kb in size",
         });
       }
-      const path = `./${process.env.CLIENT_NAME}/images/${req.category.thumbnail.fileName}`;
-      if (fs.existsSync(path)) {
-        try {
-          fs.unlinkSync(path, function (err) {
-            console.log("error unlink", err);
-          });
-        } catch (err) {
-          console.log(err);
-        }
-      }
-
+      unlinkStaticFile(req.category.thumbnail.fileName);
       category.thumbnail.fileName = files.thumbnail.path.split("/")[2];
       category.thumbnail.contentType = files.thumbnail.type;
     }
@@ -500,6 +422,18 @@ exports.update = (req, res) => {
   });
 };
 
+const unlinkStaticFile=(fileName)=>{
+  const path = `./${process.env.CLIENT_NAME}/images/${fileName}`;
+  if (fs.existsSync(path)) {
+    try {
+      fs.unlinkSync(path, function (err) {
+        console.log("error unlink", err);
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+}
 exports.getAllProductsOfACategory = (req, res) => {
   //  res.json(req.category);
   // console.log("req.catid", req.category._id)
@@ -542,20 +476,6 @@ exports.list = (req, res) => {
     });
 };
 
-// exports.categoriesWithProducts = (req, res) => {
-//   Category.find()
-//     .populate("products")
-//     .select("-icon -thumbnail")
-//     .exec((err, data) => {
-//       if (err) {
-//         return res.status(400).json({
-//           error: errorHandler(err),
-//         });
-//       }
-
-//       res.json(data);
-//     });
-// };
 
 exports.tree = (req, res) => {
   Category.find()
@@ -596,7 +516,6 @@ exports.tree = (req, res) => {
 };
 
 exports.image = (req, res) => {
-  console.log("image call");
   let imageName = `${process.env.CLIENT_NAME}/images/${req.query.image_name}`;
   fs.readFile(imageName, (err, imageData) => {
     if (err) {
@@ -610,18 +529,4 @@ exports.image = (req, res) => {
     res.end(imageData);
   });
 };
-// exports.thumbnail = (req, res, next) => {
-//   if (req.category.thumbnail.data) {
-//     res.set("Content-Type", req.category.thumbnail.contentType);
-//     return res.send(req.category.thumbnail.data);
-//   }
-//   next();
-// };
 
-// exports.iconMenu = (req, res, next) => {
-//   if (req.category.thumbnail.fileName) {
-//     res.set("Content-Type", req.category.thumbnail.contentType);
-//     return res.send(req.category.thumbnail.fileName);
-//   }
-//   next();
-// };
