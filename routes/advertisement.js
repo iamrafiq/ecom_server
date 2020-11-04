@@ -3,6 +3,7 @@ const router = express.Router();
 const {create, advertisementsBySlug , read, advertisementById,  remove, update, list} = require('../controllers/advertisement');
 const {requireSignin, isAuth, isAdmin} = require('../controllers/auth');
 const {userById} = require('../controllers/user');
+const {photo } = require('../controllers/photo');
 
 router.get('/advertisements/:advertisementSlug', read);
 
@@ -14,7 +15,7 @@ router.delete('/advertisement/:advertisementId/:userId', requireSignin, isAuth, 
 router.put('/advertisement/:advertisementId/:userId', requireSignin, isAuth, isAdmin, update);
 router.get('/advertisements/',  list);
 
-
+router.get(`/image`, photo)
 router.param('advertisementSlug', advertisementsBySlug);
 router.param('advertisementId', advertisementById);
 router.param('userId', userById);

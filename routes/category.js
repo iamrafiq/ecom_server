@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const {create, categoryById, categoryBySlug, read, remove, update, list, tree, children,getAllProductsOfACategory, iconMenu,  image, thumbnail} = require('../controllers/category');
+const {create, categoryById, categoryBySlug, read, remove, update, list, tree, children,getAllProductsOfACategory} = require('../controllers/category');
 const {advertisementsBySlug } = require('../controllers/advertisement');
+const {photo } = require('../controllers/photo');
+
 
 const {requireSignin, isAuth, isAdmin} = require('../controllers/auth');
 const {userById} = require('../controllers/user');
@@ -20,7 +22,7 @@ router.get('/categories/',  list);
 // router.get('/categories-with-products/',  categoriesWithProducts);
 
 router.get('/categories/tree',  tree);
-router.get(`/image`, image)
+router.get(`/image`, photo)
 
 // router.get(`/images/icon-menu/:categoryId`, iconMenu)
 // router.get(`/images/icon/:categoryId`, icon)

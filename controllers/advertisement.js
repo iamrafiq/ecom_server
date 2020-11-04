@@ -2,11 +2,13 @@ const Advertisement = require("../models/advertisement");
 const lodash = require("lodash"); // for updating fields
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const formidable = require("formidable"); // for uploading image
+const {initClientDir, buildImageUrl, unlinkStaticFile } =require("../utils/utils");
 
 exports.create = (req, res) => {
   console.log("Category Create", req.body);
-  let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
-  form.keepExtensions = true; // what ever image type is getting extentions will be there
+  let form = new formidable.IncomingForm(); 
+  form.keepExtensions = true; 
+  form.uploadDir = initClientDir();
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
     if (err) {
@@ -20,6 +22,16 @@ exports.create = (req, res) => {
       console.log("slugssss...", fields.slugPages)
       let slugPages = fields.slugPages.split(",");
       advertisement.slugPages = slugPages;
+    }
+    if (files.photo) {
+      //1kb = 1000
+      //1mb = 1000000
+      if (files.photo.size > 200000000) {
+        return res.status(400).json({
+          error: "Image should be less than 2kb in size",
+        });
+      }
+      buildImageUrl(advertisement.photo, files.photo);
     }
 
     advertisement
@@ -77,6 +89,7 @@ exports.remove = (req, res) => {
   advertisement
     .remove()
     .then((result) => {
+      unlinkStaticFile(result.photo.url)
       res.json({
         //result,
         message: "Advertisement deleted successfully",
@@ -93,6 +106,7 @@ exports.update = (req, res) => {
   console.log("advert update");
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
+  form.uploadDir = initClientDir();
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
     console.log(err);
@@ -108,6 +122,18 @@ exports.update = (req, res) => {
     if (fields.slugPages) {
       const slugPages = fields.slugPages.split(",");
       advertisement.slugPages = slugPages;
+    }
+
+    if (files.photo) {
+      //1kb = 1000
+      //1mb = 1000000
+      if (files.photo.size > 200000000) {
+        return res.status(400).json({
+          error: "Image should be less than 2kb in size",
+        });
+      }
+      unlinkStaticFile(advertisement.photo.url)
+      buildImageUrl(advertisement.photo, files.photo);
     }
 
     advertisement

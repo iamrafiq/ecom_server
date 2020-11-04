@@ -13,10 +13,9 @@ const advertisementSchema = new mongoose.Schema(
         type: String
       },
     ],
-    photoUrl: {
-      type: String,
-      required: true,
-      unique: true,
+    photo: {
+      url: String,
+      contentType: String,
     },
   },
   { timestamps: true }
