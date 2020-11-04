@@ -14,8 +14,7 @@ const advertisementSchema = new mongoose.Schema(
       },
     ],
     photo: {
-      url: String,
-      contentType: String,
+      type: String,
     },
   },
   { timestamps: true }

@@ -1,5 +1,6 @@
 
 const fs = require("fs");
+const { errorHandler } = require("../helpers/dbErrorHandler");
 
 exports.photo = (req, res) => {
     console.log("image call");
@@ -10,9 +11,9 @@ exports.photo = (req, res) => {
           error: errorHandler(err),
         });
       }
-      res.writeHead(200, {
-        "Content-Type": "image/webp",
-      });
+      // res.writeHead(200, {
+      //   "Content-Type": "image/webp",
+      // });
       res.end(imageData);
     });
   };

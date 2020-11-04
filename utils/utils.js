@@ -1,5 +1,4 @@
 const fs = require("fs");
-var os = require("os");
 var url = require("url");
 
 exports.initClientDir = () => {
@@ -14,14 +13,9 @@ exports.initClientDir = () => {
     return clientDir;
   };
   
-  exports.buildImageUrl = (obj, field) => {
-    obj.url = `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
-      field.path.split("/")[2]
-    }`; // building image url to route
-    obj.contentType = field.type;
-  };
+
   exports.unlinkStaticFile = (photoUrl) => {
-    if (photoUrl) {
+    if (photoUrl && photoUrl.length>0) {
       var parts = url.parse(photoUrl, true);
       const path = `./${process.env.CLIENT_NAME}/images/${parts.query.name}`;
         if (fs.existsSync(path)) {

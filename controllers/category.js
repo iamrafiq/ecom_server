@@ -6,7 +6,14 @@ const formidable = require("formidable"); // for uploading image
 const fs = require("fs");
 const { findById } = require("../models/category");
 const { result } = require("lodash");
-const {initClientDir, buildImageUrl, unlinkStaticFile } =require("../utils/utils");
+const  {unlinkStaticFile, initClientDir}  =require("../utils/utils");
+var os = require("os");
+
+buildImageUrl= (field) => {
+  return `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
+   field.path.split("/")[2]
+ }`; // building image url to route
+};
 exports.create = (req, res) => {
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
@@ -61,7 +68,7 @@ exports.create = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      buildImageUrl(category.iconMenu, files.iconMenu);
+      category.iconMenu = buildImageUrl( files.iconMenu);
     }
     if (files.icon) {
       //1kb = 1000
@@ -71,7 +78,7 @@ exports.create = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      buildImageUrl(category.icon, files.icon);
+      category.icon = buildImageUrl( files.icon);
     }
     if (files.thumbnail) {
       //console.log('Files icon: ', files.icon);
@@ -82,7 +89,7 @@ exports.create = (req, res) => {
           error: "Image should be less than 250kb in size",
         });
       }
-      buildImageUrl(category.thumbnail, files.thumbnail);
+      category.thumbnail = buildImageUrl( files.thumbnail);
     }
 
     category
@@ -220,9 +227,9 @@ const removeFast = (category, res, parentName) => {
         category
           .remove()
           .then((result2) => {
-            unlinkStaticFile(result2.iconMenu.url);
-            unlinkStaticFile(result2.icon.url);
-            unlinkStaticFile(result2.thumbnail.url);
+            unlinkStaticFile(result2.iconMenu);
+            unlinkStaticFile(result2.icon);
+            unlinkStaticFile(result2.thumbnail);
 
             var bulk = Product.collection.initializeUnorderedBulkOp();
             bulk
@@ -305,8 +312,14 @@ exports.update = (req, res) => {
       //   }
       // }
 
-      unlinkStaticFile(req.category.iconMenu.url);
-      buildImageUrl(category.iconMenu, files.iconMenu);
+      console.log("buiiiiiiiiiiiild1")
+
+      unlinkStaticFile(req.category.iconMenu);
+      console.log("buiiiiiiiiiiiild2")
+
+      category.iconMenu = buildImageUrl( files.iconMenu);
+      console.log("buiiiiiiiiiiiild3")
+
     }
     if (files.icon) {
       //1kb = 1000
@@ -317,8 +330,10 @@ exports.update = (req, res) => {
         });
       }
 
-      unlinkStaticFile(req.category.icon.url);
-      buildImageUrl(category.icon, files.icon);
+      unlinkStaticFile(req.category.icon);
+      category.icon = buildImageUrl( files.icon);
+      console.log("buiiiiiiiiiiiild", category.icon)
+
     }
     if (files.thumbnail) {
       //console.log('Files icon: ', files.icon);
@@ -329,8 +344,8 @@ exports.update = (req, res) => {
           error: "Image should be less than 250kb in size",
         });
       }
-      unlinkStaticFile(req.category.thumbnail.url);
-      buildImageUrl(category.thumbnail, files.thumbnail);
+      unlinkStaticFile(req.category.thumbnail);
+      category.thumbnail = buildImageUrl( files.thumbnail);
     }
     category
       .save()

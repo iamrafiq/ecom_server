@@ -2,8 +2,14 @@ const Advertisement = require("../models/advertisement");
 const lodash = require("lodash"); // for updating fields
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const formidable = require("formidable"); // for uploading image
-const {initClientDir, buildImageUrl, unlinkStaticFile } =require("../utils/utils");
+const {initClientDir, unlinkStaticFile } =require("../utils/utils");
+var os = require("os");
 
+buildImageUrl= (field) => {
+  return `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
+   field.path.split("/")[2]
+ }`; // building image url to route
+};
 exports.create = (req, res) => {
   console.log("Category Create", req.body);
   let form = new formidable.IncomingForm(); 
@@ -31,7 +37,7 @@ exports.create = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      buildImageUrl(advertisement.photo, files.photo);
+      advertisement.photo = buildImageUrl(files.photo);
     }
 
     advertisement
@@ -89,7 +95,7 @@ exports.remove = (req, res) => {
   advertisement
     .remove()
     .then((result) => {
-      unlinkStaticFile(result.photo.url)
+      unlinkStaticFile(result.photo)
       res.json({
         //result,
         message: "Advertisement deleted successfully",
@@ -132,8 +138,8 @@ exports.update = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      unlinkStaticFile(advertisement.photo.url)
-      buildImageUrl(advertisement.photo, files.photo);
+      unlinkStaticFile(advertisement.photo)
+      advertisement.photo=buildImageUrl(files.photo);
     }
 
     advertisement
