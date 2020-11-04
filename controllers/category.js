@@ -6,8 +6,9 @@ const formidable = require("formidable"); // for uploading image
 const fs = require("fs");
 const { findById } = require("../models/category");
 const { result } = require("lodash");
-
-const initClinentDir = () =>{
+var os = require("os");
+var url = require("url");
+const initClinentDir = () => {
   let clientDir = `./${process.env.CLIENT_NAME}`;
   if (!fs.existsSync(clientDir)) {
     fs.mkdirSync(clientDir);
@@ -17,9 +18,30 @@ const initClinentDir = () =>{
     fs.mkdirSync(clientDir);
   }
   return clientDir;
-}
+};
+
+const buildImageUrl = (obj, field) => {
+  obj.url = `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
+    field.path.split("/")[2]
+  }`; // building image url to route
+  objcontentType = field.type;
+};
+const unlinkStaticFile = (iconUrl) => {
+  if (iconUrl) {
+    var parts = url.parse(iconUrl, true);
+    const path = `./${process.env.CLIENT_NAME}/images/${parts.query.name}`;
+      if (fs.existsSync(path)) {
+        try {
+          fs.unlinkSync(path, function (err) {
+            console.log("error unlink", err);
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      }
+  }
+};
 exports.create = (req, res) => {
- 
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
   form.uploadDir = initClinentDir();
@@ -73,8 +95,7 @@ exports.create = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      category.iconMenu.fileName = files.iconMenu.path.split("/")[2];
-      category.iconMenu.contentType = files.iconMenu.type;
+      buildImageUrl(category.iconMenu, files.iconMenu);
     }
     if (files.icon) {
       //1kb = 1000
@@ -84,11 +105,7 @@ exports.create = (req, res) => {
           error: "Image should be less than 2kb in size",
         });
       }
-      console.log("image path:", files.icon.path);
-      category.icon.fileName = files.icon.path.split("/")[2];
-      category.icon.contentType = files.icon.type;
-      // category.icon.data = fs.readFileSync(files.icon.path);
-      // category.icon.contentType = files.icon.type;
+      buildImageUrl(category.icon, files.icon);
     }
     if (files.thumbnail) {
       //console.log('Files icon: ', files.icon);
@@ -99,10 +116,7 @@ exports.create = (req, res) => {
           error: "Image should be less than 250kb in size",
         });
       }
-      category.thumbnail.fileName = files.thumbnail.path.split("/")[2];
-      category.thumbnail.contentType = files.thumbnail.type;
-      // category.thumbnail.data = fs.readFileSync(files.thumbnail.path);
-      // category.thumbnail.contentType = files.thumbnail.type;
+      buildImageUrl(category.thumbnail, files.thumbnail);
     }
 
     category
@@ -203,7 +217,6 @@ exports.read = (req, res) => {
   return res.json(req.category);
 };
 
-
 exports.remove = (req, res) => {
   // console.log("remove called");
   let category = req.category;
@@ -241,9 +254,9 @@ const removeFast = (category, res, parentName) => {
         category
           .remove()
           .then((result2) => {
-            unlinkStaticFile(result2.iconMenu.fileName);
-            unlinkStaticFile(result2.icon.fileName);
-            unlinkStaticFile(result2.thumbnail.fileName);
+            unlinkStaticFile(result2.iconMenu.url);
+            unlinkStaticFile(result2.icon.url);
+            unlinkStaticFile(result2.thumbnail.url);
 
             var bulk = Product.collection.initializeUnorderedBulkOp();
             bulk
@@ -310,10 +323,6 @@ exports.update = (req, res) => {
     if (files.iconMenu) {
       //1kb = 1000
       //1mb = 1000000
-      console.log(
-        "iconMenu",
-        `./${process.env.CLIENT_NAME}/images/${req.category.iconMenu.fileName}`
-      );
       if (files.iconMenu.size > 200000000) {
         return res.status(400).json({
           error: "Image should be less than 2kb in size",
@@ -330,10 +339,8 @@ exports.update = (req, res) => {
       //   }
       // }
 
-      unlinkStaticFile(req.category.iconMenu.fileName);
-
-      category.iconMenu.fileName = files.iconMenu.path.split("/")[2];
-      category.iconMenu.contentType = files.iconMenu.type;
+      unlinkStaticFile(req.category.iconMenu.url);
+      buildImageUrl(category.iconMenu, files.iconMenu);
     }
     if (files.icon) {
       //1kb = 1000
@@ -344,10 +351,8 @@ exports.update = (req, res) => {
         });
       }
 
-      unlinkStaticFile(req.category.icon.fileName);
-
-      category.icon.fileName = files.icon.path.split("/")[2];
-      category.icon.contentType = files.icon.type;
+      unlinkStaticFile(req.category.icon.url);
+      buildImageUrl(category.icon, files.icon);
     }
     if (files.thumbnail) {
       //console.log('Files icon: ', files.icon);
@@ -358,9 +363,8 @@ exports.update = (req, res) => {
           error: "Image should be less than 250kb in size",
         });
       }
-      unlinkStaticFile(req.category.thumbnail.fileName);
-      category.thumbnail.fileName = files.thumbnail.path.split("/")[2];
-      category.thumbnail.contentType = files.thumbnail.type;
+      unlinkStaticFile(req.category.thumbnail.url);
+      buildImageUrl(category.thumbnail, files.thumbnail);
     }
     category
       .save()
@@ -422,18 +426,6 @@ exports.update = (req, res) => {
   });
 };
 
-const unlinkStaticFile=(fileName)=>{
-  const path = `./${process.env.CLIENT_NAME}/images/${fileName}`;
-  if (fs.existsSync(path)) {
-    try {
-      fs.unlinkSync(path, function (err) {
-        console.log("error unlink", err);
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  }
-}
 exports.getAllProductsOfACategory = (req, res) => {
   //  res.json(req.category);
   // console.log("req.catid", req.category._id)
@@ -476,7 +468,6 @@ exports.list = (req, res) => {
     });
 };
 
-
 exports.tree = (req, res) => {
   Category.find()
     .populate("parent")
@@ -516,8 +507,9 @@ exports.tree = (req, res) => {
 };
 
 exports.image = (req, res) => {
-  let imageName = `${process.env.CLIENT_NAME}/images/${req.query.image_name}`;
-  fs.readFile(imageName, (err, imageData) => {
+  console.log("image call");
+  let pathToLocalStorage = `${process.env.CLIENT_NAME}/images/${req.query.name}`;
+  fs.readFile(pathToLocalStorage, (err, imageData) => {
     if (err) {
       return res.status(400).json({
         error: errorHandler(err),
@@ -529,4 +521,3 @@ exports.image = (req, res) => {
     res.end(imageData);
   });
 };
-
