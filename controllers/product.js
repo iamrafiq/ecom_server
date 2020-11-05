@@ -8,7 +8,21 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 var mongoose = require("mongoose");
 let Parent = mongoose.model("Parent", { name: "string", size: "string" });
 let Child = mongoose.model("Child", { name: "string", size: "string" });
+const { unlinkStaticFile, initClientDir } = require("../utils/utils");
+var os = require("os");
 
+buildImageUrl = (field) => {
+  return `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
+    field.path.split("/")[2]
+  }`; // building image url to route
+};
+checkSize = (file) => {
+  if (file.size > 200000000) {
+    return res.status(400).json({
+      error: "Image should be less than 2kb in size",
+    });
+  }
+};
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category")
@@ -49,9 +63,10 @@ async function startNewSession() {
 }
 
 exports.create = (req, res) => {
-
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
+  form.uploadDir = initClientDir();
+  form.multiples = true;
   form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
     if (err) {
@@ -59,6 +74,8 @@ exports.create = (req, res) => {
         error: "form data parsing error",
       });
     }
+
+    // console.log("fields.offerPhotosUrl..", fields.offerPhotosUrl);
 
     // check for all fields
 
@@ -75,7 +92,7 @@ exports.create = (req, res) => {
     //     error: "All fields are required",
     //   });
     // }
-     console.log("product...",fields);
+    console.log("product...", fields);
 
     let product = new Product(fields);
 
@@ -91,19 +108,50 @@ exports.create = (req, res) => {
       const recursiveCats = fields.rc.split(",");
       product.recursiveCategories = recursiveCats;
     }
-    if (fields.photosUrl) {
-      const photosUrl = fields.photosUrl.split(",");
-      product.photosUrl = photosUrl;
-    }
-    if (fields.offerPhotosUrl) {
-      const offerPhotosUrl = fields.offerPhotosUrl.split(",");
-      product.offerPhotosUrl = offerPhotosUrl;
-    }
+
     if (fields.relatedProducts) {
       const relatedProducts = fields.relatedProducts.split(",");
       product.relatedProducts = relatedProducts;
     }
-    
+
+    let photos = [];
+    if (files.photo1Url) {
+      checkSize(files.photo1Url);
+      photos.push(buildImageUrl(files.photo1Url));
+    }
+    if (files.photo2Url) {
+      checkSize(files.photo2Url);
+      photos.push(buildImageUrl(files.photo2Url));
+    }
+    if (files.photo3Url) {
+      checkSize(files.photo3Url);
+      photos.push(buildImageUrl(files.photo3Url));
+    }
+    if (files.photo4Url) {
+      checkSize(files.photo4Url);
+      photos.push(buildImageUrl(files.photo4Url));
+    }
+
+    let offecrPhotos = [];
+    if (files.offerPhoto1Url) {
+      checkSize(files.offerPhoto1Url);
+      offecrPhotos.push(buildImageUrl(files.offerPhoto1Url));
+    }
+    if (files.offerPhoto2Url) {
+      checkSize(files.offerPhoto2Url);
+      offecrPhotos.push(buildImageUrl(files.offerPhoto2Url));
+    }
+    if (files.offerPhoto3Url) {
+      checkSize(files.offerPhoto3Url);
+      offecrPhotos.push(buildImageUrl(files.offerPhoto3Url));
+    }
+    if (files.offerPhoto4Url) {
+      checkSize(files.offerPhoto4Url);
+      offecrPhotos.push(buildImageUrl(files.offerPhoto4Url));
+    }
+    product.photosUrl = photos;
+    product.offerPhotosUrl = offecrPhotos;
+
     product
       .save()
       .then((result) => {
@@ -130,6 +178,16 @@ exports.remove = (req, res) => {
   product
     .remove()
     .then((result) => {
+      if (result.photosUrl && result.photosUrl.length > 0) {
+        for (let i = 0; i < result.photosUrl.length; i++) {
+          unlinkStaticFile(result.photosUrl[i]);
+        }
+      }
+      if (result.offerPhotosUrl && result.offerPhotosUrl.length > 0) {
+        for (let i = 0; i < result.offerPhotosUrl.length; i++) {
+          unlinkStaticFile(result.offerPhotosUrl[i]);
+        }
+      }
       var bulk = Category.collection.initializeUnorderedBulkOp();
       bulk
         .find({
@@ -167,6 +225,8 @@ exports.update = (req, res) => {
   console.log("update.....");
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
+  form.uploadDir = initClientDir();
+  form.multiples = true;
   form.parse(req, (err, fields, files) => {
     if (err) {
       return res.status(400).json({
@@ -174,6 +234,57 @@ exports.update = (req, res) => {
       });
     }
 
+    let photos = [];
+    if (files.photo1Url) {
+      checkSize(files.photo1Url);
+      photos.push(buildImageUrl(files.photo1Url));
+    }
+    if (files.photo2Url) {
+      checkSize(files.photo2Url);
+      photos.push(buildImageUrl(files.photo2Url));
+    }
+    if (files.photo3Url) {
+      checkSize(files.photo3Url);
+      photos.push(buildImageUrl(files.photo3Url));
+    }
+    if (files.photo4Url) {
+      checkSize(files.photo4Url);
+      photos.push(buildImageUrl(files.photo4Url));
+    }
+
+    let offecrPhotos = [];
+    if (files.offerPhoto1Url) {
+      checkSize(files.offerPhoto1Url);
+      offecrPhotos.push(buildImageUrl(files.offerPhoto1Url));
+    }
+    if (files.offerPhoto2Url) {
+      checkSize(files.offerPhoto2Url);
+      offecrPhotos.push(buildImageUrl(files.offerPhoto2Url));
+    }
+    if (files.offerPhoto3Url) {
+      checkSize(files.offerPhoto3Url);
+      offecrPhotos.push(buildImageUrl(files.offerPhoto3Url));
+    }
+    if (files.offerPhoto4Url) {
+      checkSize(files.offerPhoto4Url);
+      offecrPhotos.push(buildImageUrl(files.offerPhoto4Url));
+    }
+
+    if (photos) {
+      if (req.product.photosUrl && req.product.photosUrl.length > 0) {
+        for (let i = 0; i < req.product.photosUrl.length; i++) {
+          unlinkStaticFile(req.product.photosUrl[i]);
+        }
+      }
+    }
+    if (offecrPhotos) {
+      if (req.product.offerPhotosUrl && req.product.offerPhotosUrl.length > 0) {
+        for (let i = 0; i < req.product.offerPhotosUrl.length; i++) {
+          unlinkStaticFile(req.product.offerPhotosUrl[i]);
+        }
+      }
+    }
+    /**fisrt unlinking photos if there then loadasing */
     let product = req.product;
     product = lodash.extend(product, fields);
 
@@ -185,18 +296,15 @@ exports.update = (req, res) => {
       const recursiveCats = fields.rc.split(",");
       product.recursiveCategories = recursiveCats;
     }
-    if (fields.photosUrl) {
-      const photosUrl = fields.photosUrl.split(",");
-      product.photosUrl = photosUrl;
-    }
-    if (fields.offerPhotosUrl) {
-      const offerPhotosUrl = fields.offerPhotosUrl.split(",");
-      product.offerPhotosUrl = offerPhotosUrl;
-    }
+
     if (fields.relatedProducts) {
       const relatedProducts = fields.relatedProducts.split(",");
       product.relatedProducts = relatedProducts;
     }
+
+    product.photosUrl = photos;
+    product.offerPhotosUrl = offecrPhotos;
+
     product
       .save()
       .then((result) => {
@@ -299,7 +407,7 @@ exports.list = (req, res) => {
 exports.getAllProducts = (req, res) => {
   let order = req.query.order ? req.query.order : "asc";
   Product.find()
-    .select("-photo -category") 
+    .select("-photo -category")
     .sort([[order]])
     .exec((err, products) => {
       if (err) {

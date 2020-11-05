@@ -7,27 +7,25 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
       // required: true,
-    //  unique:true,
+      //  unique:true,
       maxlength: 32,
     },
-    name: { 
+    name: {
       type: String,
       trim: true,
       // required: true,
-         //  unique:true,
-
+      //  unique:true,
     },
     slug: {
       type: String,
       trim: true,
       // required: true,
-          //  unique:true,
-
+      //  unique:true,
     },
     bengaliName: {
       type: String,
       // required: true,
-          //  unique:true,
+      //  unique:true,
       trim: true,
     },
     nameWithOutSubText: {
@@ -55,11 +53,11 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    blockSale: { 
+    blockSale: {
       type: Number,
       default: 0,
     },
-    
+
     isAlwaysAvailable: {
       type: Number,
       default: 0,
@@ -68,7 +66,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    preferredStock: { 
+    preferredStock: {
       type: Number,
       default: 0,
     },
@@ -81,38 +79,36 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
     thirdPartyItem: {
-        type: Number,
-        default: 0,
-      },
-    earliestAvailabilityTime: { 
-      type: String,
-      trim:true
+      type: Number,
+      default: 0,
     },
-    availabilityCutOffTime: { 
+    earliestAvailabilityTime: {
       type: String,
-      trim:true
+      trim: true,
     },
- 
-      shortDesc: {
-        type: String,
-        trim: true,
-        maxlength: 500,
-      },
-      longDesc: {
-        type: String,
-        trim: true,
-        maxlength: 2000,
-      },
+    availabilityCutOffTime: {
+      type: String,
+      trim: true,
+    },
+
+    shortDesc: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+    },
+    longDesc: {
+      type: String,
+      trim: true,
+      maxlength: 2000,
+    },
     photosUrl: [
       {
         type: String,
-        trim: true,
       },
     ],
     offerPhotosUrl: [
       {
         type: String,
-        trim: true,
       },
     ],
     relatedProducts: [
@@ -129,12 +125,12 @@ const productSchema = new mongoose.Schema(
       },
     ],
     recursiveCategories: [
-        {
-          type: ObjectId,
-          ref: "Category",
-          required: true,
-        },
-      ],
+      {
+        type: ObjectId,
+        ref: "Category",
+        required: true,
+      },
+    ],
     manufacturers: [
       {
         type: ObjectId,

@@ -14,6 +14,7 @@ buildImageUrl= (field) => {
    field.path.split("/")[2]
  }`; // building image url to route
 };
+
 exports.create = (req, res) => {
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
