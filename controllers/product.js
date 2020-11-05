@@ -7,27 +7,30 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 //const { CallTracker } = require("assert");
 var mongoose = require("mongoose");
 const {
-  unlinkStaticFile,
+  unlinkProductStaticFile,
   initClientDir,
-  resolutionTypes,
-  createLowRes,
+  productResolutionTypes,
+  createLowResProduct,
   renameFile,
+  createMediumResProduct,
+  createHighResProduct,
+  unlinkTemporaryFile,
 } = require("../utils/utils");
 var os = require("os");
-newName = (photo, slug, subText, index, fileExtension) => {
+newNameOldPath = (photo, slug, subText, fileExtension) => {
   let frags = photo.path.split("/");
-  if (subText) {
+  if (subText && subText.length > 0) {
     return `${frags[0]}/${frags[1]}/${slug}-${subText
       .split(" ")
-      .join("-")}-${index}.${fileExtension}`;
+      .join("-")}.${fileExtension}`;
   } else {
-    return `${frags[0]}/${frags[1]}/${slug}-${sub}-${index}.${fileExtension}`;
+    return `${frags[0]}/${frags[1]}/${slug}.${fileExtension}`;
   }
 };
-buildImageUrl = (field) => {
-  return `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
-    field.path.split("/")[2]
-  }`; // building image url to route
+buildImageUrl = (path) => {
+  return `http://${os.hostname()}:${process.env.PORT}/api/image/${
+    path.split("/")[2]
+  }?r=${productResolutionTypes.find((ele) => ele.res === "medium").res}`; // building image url to route
 };
 checkSize = (file) => {
   if (file.size > 200000000) {
@@ -37,6 +40,21 @@ checkSize = (file) => {
   }
 };
 
+processImage = async (file, slug, subText) => {
+  // checkSize(file);
+  let nNPath = newNameOldPath(
+    file,
+    slug,
+    subText,
+    file.path.split("/")[2].split(".")[1]
+  );
+  renameFile(file, nNPath);
+  await createLowResProduct(nNPath);
+  await createMediumResProduct(nNPath);
+  await createHighResProduct(nNPath);
+  unlinkTemporaryFile(nNPath);
+  return buildImageUrl(nNPath);
+};
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category")
@@ -76,129 +94,114 @@ async function startNewSession() {
   return session;
 }
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
   form.uploadDir = initClientDir();
   form.multiples = true;
-  form.parse(req, (err, fields, files) => {
+  var { fields, files } = await new Promise(function (resolve, reject) {
+    form.parse(req, function (err, fields, files) {
+      if (err) {
+        reject(err);
+        return;
+      }
+      console.log(
+        "within form.parse method, subject field of fields object is: " +
+          fields.subjects
+      );
+      resolve({ fields, files });
+    }); // form.parse
+  });
+  /*form.parse(req, (err, fields, files) => {
     // parsing the form for files and fields
     if (err) {
       return status(400).json({
         error: "form data parsing error",
       });
-    }
+    }*/
 
-    // console.log("fields.offerPhotosUrl..", fields.offerPhotosUrl);
+  let product = new Product(fields);
 
-    // check for all fields
+  if (fields.cats) {
+    const cats = fields.cats.split(",");
+    product.categories = cats;
+  } else {
+    return res.status(400).json({
+      error: "Please select categories of this product",
+    });
+  }
+  if (fields.rc) {
+    const recursiveCats = fields.rc.split(",");
+    product.recursiveCategories = recursiveCats;
+  }
 
-    // const { name, description, price, category, quantity, shipping } = fields;
-    // if (
-    //   !name ||
-    //   !description ||
-    //   !price ||
-    //   !category ||
-    //   !quantity ||
-    //   !shipping
-    // ) {
-    //   return res.status(400).json({
-    //     error: "All fields are required",
-    //   });
-    // }
-    console.log("product...", fields);
+  if (fields.relatedProducts) {
+    const relatedProducts = fields.relatedProducts.split(",");
+    product.relatedProducts = relatedProducts;
+  }
 
-    let product = new Product(fields);
+  let photos = [];
+  if (files.photo1Url) {
+    photos.push(
+      await processImage(files.photo1Url, fields.slug, fields.subText)
+    );
+  }
+  if (files.photo2Url) {
+    photos.push(
+      await processImage(files.photo2Url, fields.slug, fields.subText)
+    );
+  }
+  if (files.photo3Url) {
+    photos.push(
+      await processImage(files.photo3Url, fields.slug, fields.subText)
+    );
+  }
+  if (files.photo4Url) {
+    photos.push(
+      await processImage(files.photo4Url, fields.slug, fields.subText)
+    );
+  }
 
-    if (fields.cats) {
-      const cats = fields.cats.split(",");
-      product.categories = cats;
-    } else {
-      return res.status(400).json({
-        error: "Please select categories of this product",
-      });
-    }
-    if (fields.rc) {
-      const recursiveCats = fields.rc.split(",");
-      product.recursiveCategories = recursiveCats;
-    }
+  let offecrPhotos = [];
+  if (files.offerPhoto1Url) {
+    checkSize(files.offerPhoto1Url);
+    offecrPhotos.push(buildImageUrl(files.offerPhoto1Url));
+  }
+  if (files.offerPhoto2Url) {
+    checkSize(files.offerPhoto2Url);
+    offecrPhotos.push(buildImageUrl(files.offerPhoto2Url));
+  }
+  if (files.offerPhoto3Url) {
+    checkSize(files.offerPhoto3Url);
+    offecrPhotos.push(buildImageUrl(files.offerPhoto3Url));
+  }
+  if (files.offerPhoto4Url) {
+    checkSize(files.offerPhoto4Url);
+    offecrPhotos.push(buildImageUrl(files.offerPhoto4Url));
+  }
+  product.photosUrl = photos;
+  product.offerPhotosUrl = offecrPhotos;
 
-    if (fields.relatedProducts) {
-      const relatedProducts = fields.relatedProducts.split(",");
-      product.relatedProducts = relatedProducts;
-    }
-
-    let photos = [];
-    if (files.photo1Url) {
-      checkSize(files.photo1Url);
-      let nName = newName(
-        files.photo1Url,
-        fields.slug,
-        fields.subText,
-        0,
-        files.photo1Url.fileExtension
-      );
-      console.log("new Name: ", nName);
-      renameFile(files.photo1Url, nName);
-      photos.push(buildImageUrl(nName));
-      createLowRes(nName);
-    }
-    if (files.photo2Url) {
-      checkSize(files.photo2Url);
-      photos.push(buildImageUrl(files.photo2Url));
-      createLowRes(files.photo2Url);
-    }
-    if (files.photo3Url) {
-      checkSize(files.photo3Url);
-      photos.push(buildImageUrl(files.photo3Url));
-      createLowRes(files.photo3Url);
-    }
-    if (files.photo4Url) {
-      checkSize(files.photo4Url);
-      photos.push(buildImageUrl(files.photo4Url));
-      createLowRes(files.photo4Url);
-    }
-
-    let offecrPhotos = [];
-    if (files.offerPhoto1Url) {
-      checkSize(files.offerPhoto1Url);
-      offecrPhotos.push(buildImageUrl(files.offerPhoto1Url));
-    }
-    if (files.offerPhoto2Url) {
-      checkSize(files.offerPhoto2Url);
-      offecrPhotos.push(buildImageUrl(files.offerPhoto2Url));
-    }
-    if (files.offerPhoto3Url) {
-      checkSize(files.offerPhoto3Url);
-      offecrPhotos.push(buildImageUrl(files.offerPhoto3Url));
-    }
-    if (files.offerPhoto4Url) {
-      checkSize(files.offerPhoto4Url);
-      offecrPhotos.push(buildImageUrl(files.offerPhoto4Url));
-    }
-    product.photosUrl = photos;
-    product.offerPhotosUrl = offecrPhotos;
-
-    product
-      .save()
-      .then((result) => {
-        Category.updateMany(
-          { _id: { $in: product.categories } },
-          { $push: { products: result._id } }
-        )
-          .then((results) => {
-            res.json(result);
-          })
-          .catch((error) => {
-            return res.status(400).json({
-              error: errorHandler(error),
-            });
+  product
+    .save()
+    .then((result) => {
+      Category.updateMany(
+        { _id: { $in: product.categories } },
+        { $push: { products: result._id } }
+      )
+        .then((results) => {
+          res.json(result);
+        })
+        .catch((error) => {
+          return res.status(400).json({
+            error: errorHandler(error),
           });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  });
+        });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  // });
 };
 exports.remove = (req, res) => {
   let product = req.product;
@@ -207,12 +210,12 @@ exports.remove = (req, res) => {
     .then((result) => {
       if (result.photosUrl && result.photosUrl.length > 0) {
         for (let i = 0; i < result.photosUrl.length; i++) {
-          unlinkStaticFile(result.photosUrl[i]);
+          unlinkProductStaticFile(result.photosUrl[i]);
         }
       }
       if (result.offerPhotosUrl && result.offerPhotosUrl.length > 0) {
         for (let i = 0; i < result.offerPhotosUrl.length; i++) {
-          unlinkStaticFile(result.offerPhotosUrl[i]);
+          unlinkProductStaticFile(result.offerPhotosUrl[i]);
         }
       }
       var bulk = Category.collection.initializeUnorderedBulkOp();
@@ -304,14 +307,14 @@ exports.update = (req, res) => {
     if (photos) {
       if (req.product.photosUrl && req.product.photosUrl.length > 0) {
         for (let i = 0; i < req.product.photosUrl.length; i++) {
-          unlinkStaticFile(req.product.photosUrl[i]);
+          unlinkProductStaticFile(req.product.photosUrl[i]);
         }
       }
     }
     if (offecrPhotos) {
       if (req.product.offerPhotosUrl && req.product.offerPhotosUrl.length > 0) {
         for (let i = 0; i < req.product.offerPhotosUrl.length; i++) {
-          unlinkStaticFile(req.product.offerPhotosUrl[i]);
+          unlinkProductStaticFile(req.product.offerPhotosUrl[i]);
         }
       }
     }
