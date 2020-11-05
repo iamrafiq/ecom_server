@@ -6,10 +6,13 @@ const Category = require("../models/category");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 //const { CallTracker } = require("assert");
 var mongoose = require("mongoose");
-let Parent = mongoose.model("Parent", { name: "string", size: "string" });
-let Child = mongoose.model("Child", { name: "string", size: "string" });
-const { unlinkStaticFile, initClientDir } = require("../utils/utils");
+const {
+  unlinkStaticFile,
+  initClientDir,
+  resolutionTypes,
+} = require("../utils/utils");
 var os = require("os");
+var sharp = require("sharp");
 
 buildImageUrl = (field) => {
   return `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
@@ -22,6 +25,17 @@ checkSize = (file) => {
       error: "Image should be less than 2kb in size",
     });
   }
+};
+createLowRes = (photo) => {
+  let w = resolutionTypes.find((ele) => ele.res === "low").width;
+  let frags = photo.path.split("/");
+  sharp(photo.path)
+    .resize({
+      fit: sharp.fit.contain,
+      width: w,
+    })
+    .webp({ quality: 50 })
+    .toFile(`./${frags[0]}/${frags[1]}/${w}_${frags[2]}`);
 };
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
@@ -118,18 +132,22 @@ exports.create = (req, res) => {
     if (files.photo1Url) {
       checkSize(files.photo1Url);
       photos.push(buildImageUrl(files.photo1Url));
+      createLowRes(files.photo1Url);
     }
     if (files.photo2Url) {
       checkSize(files.photo2Url);
       photos.push(buildImageUrl(files.photo2Url));
+      createLowRes(files.photo2Url);
     }
     if (files.photo3Url) {
       checkSize(files.photo3Url);
       photos.push(buildImageUrl(files.photo3Url));
+      createLowRes(files.photo3Url);
     }
     if (files.photo4Url) {
       checkSize(files.photo4Url);
       photos.push(buildImageUrl(files.photo4Url));
+      createLowRes(files.photo4Url);
     }
 
     let offecrPhotos = [];
@@ -238,18 +256,22 @@ exports.update = (req, res) => {
     if (files.photo1Url) {
       checkSize(files.photo1Url);
       photos.push(buildImageUrl(files.photo1Url));
+      createLowRes(files.photo1Url);
     }
     if (files.photo2Url) {
       checkSize(files.photo2Url);
       photos.push(buildImageUrl(files.photo2Url));
+      createLowRes(files.photo2Url);
     }
     if (files.photo3Url) {
       checkSize(files.photo3Url);
       photos.push(buildImageUrl(files.photo3Url));
+      createLowRes(files.photo3Url);
     }
     if (files.photo4Url) {
       checkSize(files.photo4Url);
       photos.push(buildImageUrl(files.photo4Url));
+      createLowRes(files.photo4Url);
     }
 
     let offecrPhotos = [];
