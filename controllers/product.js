@@ -10,10 +10,20 @@ const {
   unlinkStaticFile,
   initClientDir,
   resolutionTypes,
+  createLowRes,
+  renameFile,
 } = require("../utils/utils");
 var os = require("os");
-var sharp = require("sharp");
-
+newName = (photo, slug, subText, index, fileExtension) => {
+  let frags = photo.path.split("/");
+  if (subText) {
+    return `${frags[0]}/${frags[1]}/${slug}-${subText
+      .split(" ")
+      .join("-")}-${index}.${fileExtension}`;
+  } else {
+    return `${frags[0]}/${frags[1]}/${slug}-${sub}-${index}.${fileExtension}`;
+  }
+};
 buildImageUrl = (field) => {
   return `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
     field.path.split("/")[2]
@@ -26,17 +36,7 @@ checkSize = (file) => {
     });
   }
 };
-createLowRes = (photo) => {
-  let w = resolutionTypes.find((ele) => ele.res === "low").width;
-  let frags = photo.path.split("/");
-  sharp(photo.path)
-    .resize({
-      fit: sharp.fit.contain,
-      width: w,
-    })
-    .webp({ quality: 50 })
-    .toFile(`./${frags[0]}/${frags[1]}/${w}_${frags[2]}`);
-};
+
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category")
@@ -131,8 +131,17 @@ exports.create = (req, res) => {
     let photos = [];
     if (files.photo1Url) {
       checkSize(files.photo1Url);
-      photos.push(buildImageUrl(files.photo1Url));
-      createLowRes(files.photo1Url);
+      let nName = newName(
+        files.photo1Url,
+        fields.slug,
+        fields.subText,
+        0,
+        files.photo1Url.fileExtension
+      );
+      console.log("new Name: ", nName);
+      renameFile(files.photo1Url, nName);
+      photos.push(buildImageUrl(nName));
+      createLowRes(nName);
     }
     if (files.photo2Url) {
       checkSize(files.photo2Url);
