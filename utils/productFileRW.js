@@ -11,10 +11,17 @@ exports.newName = (slug, subText, fileExtension) => {
   }
 };
 exports.buildImageUrl = (nName, photoNumber, queryFieldValue) => {
-  let nameAndExt = nName.split(".");
-  return `http://${os.hostname()}:${process.env.PORT}/api/image/${
-    nameAndExt[0]
-  }?p=${queryFieldValue}${photoNumber}&ext=${nameAndExt[1]}`;
+  console.log("renaming....building url");
+
+  let nameWithExt = nName.split(".");
+  console.log("renaming....nameAndExt", nameWithExt);
+
+  let newUrl = `http://${os.hostname()}:${process.env.PORT}/api/image/${
+    nameWithExt[0]
+  }?p=${queryFieldValue}${photoNumber}&ext=${nameWithExt[1]}`;
+  console.log("renaming....newUrl", newUrl);
+
+  return newUrl;
 };
 exports.checkSize = (file) => {
   if (file.size > 200000000) {
@@ -23,7 +30,43 @@ exports.checkSize = (file) => {
     });
   }
 };
+exports.changeNameOnly = (
+  newName,
+  photoUrls,
+  queryFieldValue,
+  productPhotosFolder
+) => {
+  console.log("inside name change");
+  let newUrls = [];
+  let index = 0;
+  photoUrls.forEach((photoUrl) => {
+    console.log("photoUrl", photoUrl);
 
+    var parts = url.parse(photoUrl, true);
+    let ext = parts.query.ext;
+    let pathModule = parts.pathname.split("/");
+    let oldName = `${pathModule[pathModule.length - 1]}`;
+    console.log("onldName", oldName);
+
+    exports.productPhotoResolutionTypes.forEach((element) => {
+      productPhotosFolder.forEach((ele) => {
+        let oldPath = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${oldName}.${ext}`;
+        let newPath = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${newName}.${ext}`;
+        console.log("oldPath", oldPath);
+        console.log("newPath", newPath);
+        if (fs.existsSync(oldPath)) {
+          fs.renameSync(oldPath, newPath);
+          console.log("renaming....");
+        }
+      });
+    });
+    index++;
+    newUrls.push(
+      exports.buildImageUrl(`${newName}.${ext}`, index, queryFieldValue)
+    );
+  });
+  return newUrls;
+};
 exports.processImage = async (
   file,
   slug,
@@ -111,7 +154,7 @@ exports.initClientDir = () => {
   return clientDir;
 };
 
-exports.unlinkStaticFile = (photoUrl) => {
+exports.unlinkStaticFile = (photoUrl, photo, offerPhoto) => {
   if (photoUrl && photoUrl.length > 0) {
     var parts = url.parse(photoUrl, true);
     let ext = parts.query.ext;
@@ -119,24 +162,29 @@ exports.unlinkStaticFile = (photoUrl) => {
     let fileName = `${pathModule[pathModule.length - 1]}.${ext}`;
 
     exports.productPhotoResolutionTypes.forEach((element) => {
-      exports.productPhotosFolder.forEach((ele) => {
-        let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${fileName}`;
+      if (photo) {
+        exports.productPhotosFolder.forEach((ele) => {
+          let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${fileName}`;
 
-        if (fs.existsSync(path)) {
-          fs.unlinkSync(path, function (err) {
-            console.log("error unlink", err);
-          });
-        }
-      });
-      exports.productOfferPhotosFolder.forEach((ele) => {
-        let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${fileName}`;
+          if (fs.existsSync(path)) {
+            fs.unlinkSync(path, function (err) {
+              console.log("error unlink", err);
+            });
+          }
+        });
+      }
 
-        if (fs.existsSync(path)) {
-          fs.unlinkSync(path, function (err) {
-            console.log("error unlink", err);
-          });
-        }
-      });
+      if (offerPhoto) {
+        exports.productOfferPhotosFolder.forEach((ele) => {
+          let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${fileName}`;
+
+          if (fs.existsSync(path)) {
+            fs.unlinkSync(path, function (err) {
+              console.log("error unlink", err);
+            });
+          }
+        });
+      }
     });
   }
 };
@@ -233,15 +281,4 @@ exports.createHighResProduct = async (
 };
 exports.renameFile = async (file, newPath) => {
   fs.renameSync(file.path, newPath);
-  console.log("renaming file");
-  // new Promise((resolve, reject) => {
-  //   fs.rename(file.path, newPath, (err)=>{
-  //     if (err){
-  //       console.log(err)
-  //     }
-  //     resolve("file name changed")
-  //   });
-  // })
-  //   .then((result) => {})
-  //   .catch((error) => console.log(error));
 };

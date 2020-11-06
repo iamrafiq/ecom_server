@@ -13,6 +13,7 @@ const {
   productOfferPhotosFolder,
   productPhotoResolutionTypes,
   productOfferPhotoResolutionTypes,
+  changeNameOnly,
 } = require("../utils/productFileRW");
 
 exports.productById = (req, res, next, id) => {
@@ -229,12 +230,12 @@ exports.remove = (req, res) => {
     .then((result) => {
       if (result.photosUrl && result.photosUrl.length > 0) {
         for (let i = 0; i < result.photosUrl.length; i++) {
-          unlinkStaticFile(result.photosUrl[i]);
+          unlinkStaticFile(result.photosUrl[i], true, false);
         }
       }
       if (result.offerPhotosUrl && result.offerPhotosUrl.length > 0) {
         for (let i = 0; i < result.offerPhotosUrl.length; i++) {
-          unlinkStaticFile(result.offerPhotosUrl[i]);
+          unlinkStaticFile(result.offerPhotosUrl[i], false, true);
         }
       }
       var bulk = Category.collection.initializeUnorderedBulkOp();
@@ -293,19 +294,24 @@ exports.update = async (req, res) => {
     }); // form.parse
   });
 
-  if (files.photo1Url) {
+  if (files.photo1Url !== undefined) {
     //  with out exsitance of  photo1Url there is no posibility of  photo2Url or 3 or 4
     if (req.product.photosUrl && req.product.photosUrl.length > 0) {
       for (let i = 0; i < req.product.photosUrl.length; i++) {
-        unlinkStaticFile(req.product.photosUrl[i]);
+        console.log("started unlinking photosUrl")
+
+        unlinkStaticFile(req.product.photosUrl[i], true, false);
       }
     }
   }
-  if (files.offerPhoto1Url) {
+
+  if (files.offerPhoto1Url !== undefined) {
     //  with out exsitance of  offerPhoto1Url there is no posibility of  offerPhoto2Url or 3 or 4
     if (req.product.offerPhotosUrl && req.product.offerPhotosUrl.length > 0) {
       for (let i = 0; i < req.product.offerPhotosUrl.length; i++) {
-        unlinkStaticFile(req.product.offerPhotosUrl[i]);
+        console.log("started unlinking offerPhotosUrl")
+
+        unlinkStaticFile(req.product.offerPhotosUrl[i], false, true);
       }
     }
   }
@@ -377,7 +383,41 @@ exports.update = async (req, res) => {
       )
     );
   }
+  if (
+    (!files.photo1Url &&
+      !files.photo2Url &&
+      !files.photo3Url &&
+      !files.photo4Url &&
+      product.photosUrl &&
+      product.photosUrl.length > 0 &&
+      fields.slug) ||
+    (!files.photo1Url &&
+      !files.photo2Url &&
+      !files.photo3Url &&
+      !files.photo4Url &&
+      product.photosUrl &&
+      product.photosUrl.length > 0 &&
+      fields.subText)
+  ) {
+    // no photo came so phots are intac we need to change there name
+    // new slug came, name change and slug change so change the names of photos in the file
+    // and change the name in the url of the photos
 
+    let newName = "";
+    if (fields.slug && fields.subText) {
+      newName = `${fields.slug}-${fields.subText.split(" ").join("-")}`;
+    } else if (fields.slug) {
+      newName = `${fields.slug}-${product.subText.split(" ").join("-")}`;
+    } else if (fields.subText) {
+      newName = `${product.slug}-${fields.subText.split(" ").join("-")}`;
+    }
+    photos = changeNameOnly(
+      newName,
+      product.photosUrl,
+      "p",
+      productPhotosFolder
+    );
+  }
   let offerPhotos = [];
 
   if (files.offerPhoto1Url) {
@@ -429,10 +469,46 @@ exports.update = async (req, res) => {
     );
   }
 
-  if (photos.length> 0){
+  if (
+    (!files.offerPhoto1Url &&
+      !files.offerPhoto2Url &&
+      !files.offerPhoto3Url &&
+      !files.offerPhoto4Url &&
+      product.offerPhotosUrl &&
+      product.offerPhotosUrl.length > 0 &&
+      fields.slug) ||
+    (!files.offerPhoto1Url &&
+      !files.offerPhoto2Url &&
+      !files.offerPhoto3Url &&
+      !files.offerPhoto4Url &&
+      product.offerPhotosUrl &&
+      product.offerPhotosUrl.length > 0 &&
+      fields.subText)
+  ) {
+    // no photo came so phots are intac we need to change there name
+    // new slug came, name change and slug change so change the names of photos in the file
+    // and change the name in the url of the photos
+
+    console.log("insiiiiiiiid...")
+    let newOfferName = "";
+    if (fields.slug && fields.subText) {
+      newOfferName = `${fields.slug}-${fields.subText.split(" ").join("-")}`;
+    } else if (fields.slug) {
+      newOfferName = `${fields.slug}-${product.subText.split(" ").join("-")}`;
+    } else if (fields.subText) {
+      newOfferName = `${product.slug}-${fields.subText.split(" ").join("-")}`;
+    }
+    offerPhotos = changeNameOnly(
+      newOfferName,
+      product.photosUrl,
+      "op",
+      productOfferPhotosFolder
+    );
+  }
+  if (photos.length > 0) {
     product.photosUrl = photos;
   }
-  if (offerPhotos){
+  if (offerPhotos.length > 0) {
     product.offerPhotosUrl = offerPhotos;
   }
 
