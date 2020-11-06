@@ -8,6 +8,7 @@ const {
   photoResolutionTypes,
   photosFolder,
   processImage,
+  changeNameOnly,
 } = require("../utils/banerAdHorizontalFileRW");
 
 exports.create = async (req, res) => {
@@ -145,7 +146,9 @@ exports.update = async (req, res) => {
         photoResolutionTypes
       );
     }
-
+    if (!files.photo && advertisement.photo && advertisement.photo.length > 0 && fields.slug) {
+      advertisement.photo = changeNameOnly(fields.slug, advertisement.photo, photosFolder[0]);
+    }
     advertisement
       .save()
       .then((result) => {

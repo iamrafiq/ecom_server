@@ -20,7 +20,25 @@ exports.checkSize = (file) => {
     });
   }
 };
+exports.changeNameOnly = (
+  newName,
+  photoUrl,
+  photoFolder,
+) => {
+  var parts = url.parse(photoUrl, true);
+  let ext = parts.query.ext;
+  let pathModule = parts.pathname.split("/");
+  let oldName = `${pathModule[pathModule.length - 1]}`;
+  exports.photoResolutionTypes.forEach((element) => {
+    let oldPath = `./${process.env.CLIENT_NAME}/images/${element.res}/${photoFolder.folderName}/${oldName}.${ext}`;
+    let newPath = `./${process.env.CLIENT_NAME}/images/${element.res}/${photoFolder.folderName}/${newName}.${ext}`;
+    if (fs.existsSync(oldPath)) {
+      fs.renameSync(oldPath, newPath);
+    }
+  });
 
+  return exports.buildImageUrl(`${newName}.${ext}`, photoFolder.folderName);
+};
 exports.processImage = async (file, slug, photoFolder, resObjs) => {
   let nName = exports.newName(slug, file.path.split("/")[2].split(".")[1]);
   await exports.createLowRes(
@@ -53,7 +71,7 @@ exports.photoResolutionTypes = [
 ];
 
 exports.photosFolder = [
-  { photoNumber: 1, folderName: "bah" }, // i for icon
+  {folderName: "bah" }, // bah for banner ad horizontal
 ];
 
 exports.initClientDir = () => {
