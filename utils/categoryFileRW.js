@@ -8,9 +8,10 @@ exports.newName = (slug, fileExtension) => {
   return `${slug}.${fileExtension}`;
 };
 exports.buildImageUrl = (nName, queryFieldValue) => {
+  let nameAndExt = nName.split(".");
   return `http://${os.hostname()}:${
     process.env.PORT
-  }/api/image/${nName}?p=${queryFieldValue}`;
+  }/api/image/${nameAndExt[0]}?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
 };
 exports.checkSize = (file) => {
   if (file.size > 200000000) {
@@ -69,8 +70,9 @@ exports.initClientDir = () => {
 exports.unlinkStaticFile = (photoUrl, folderName) => {
   if (photoUrl && photoUrl.length > 0) {
     var parts = url.parse(photoUrl, true);
+    let ext = parts.query.ext;
     let pathModule = parts.pathname.split("/");
-    let fileName = pathModule[pathModule.length - 1];
+    let fileName = `${pathModule[pathModule.length - 1]}.${ext}`; 
     let paths = [];
     exports.photoResolutionTypes.forEach((element) => {
       let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${folderName}/${fileName}`;
