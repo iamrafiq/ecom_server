@@ -30,7 +30,7 @@ exports.photo = (req, res) => {
 };
 exports.photoByFileName = (req, res, next, fileName) => {
   // req.query.res = low / medium / heigh
-  //req.query.p = p1 / p2/ p3/ p4/op1 /op2 / op3/op4
+  //req.query.p = p1 / p2/ p3/ p4/op1 /op2 / op3/op4 /i /mi/ t
   let pathToLocalStorage = `${process.env.CLIENT_NAME}/images/${req.query.res}/${req.query.p}/${fileName}`;
 
   fs.readFile(pathToLocalStorage, (err, imageData) => {

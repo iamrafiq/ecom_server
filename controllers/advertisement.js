@@ -2,7 +2,7 @@ const Advertisement = require("../models/advertisement");
 const lodash = require("lodash"); // for updating fields
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const formidable = require("formidable"); // for uploading image
-const {initClientDir, unlinkStaticFile } =require("../utils/utils");
+const {initClientDir, unlinkStaticFile } =require("../utils/categoryFileRW");
 var os = require("os");
 
 buildImageUrl= (field) => {

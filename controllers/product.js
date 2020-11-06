@@ -4,105 +4,17 @@ const fs = require("fs");
 const Product = require("../models/product");
 const Category = require("../models/category");
 const { errorHandler } = require("../helpers/dbErrorHandler");
-//const { CallTracker } = require("assert");
 var mongoose = require("mongoose");
 const {
   unlinkStaticFile,
   initClientDir,
-  createLowResProduct,
-  renameFile,
-  createMediumResProduct,
-  createHighResProduct,
-  unlinkTemporaryFile,
+  processImage,
   productPhotosFolder,
   productOfferPhotosFolder,
   productPhotoResolutionTypes,
   productOfferPhotoResolutionTypes,
-} = require("../utils/utils");
-var os = require("os");
-const { callbackify } = require("util");
-newNameOldPath = (photo, slug, subText, fileExtension) => {
-  let frags = photo.path.split("/");
-  if (subText && subText.length > 0) {
-    return `${frags[0]}/${frags[1]}/${slug}-${subText
-      .split(" ")
-      .join("-")}.${fileExtension}`;
-  } else {
-    return `${frags[0]}/${frags[1]}/${slug}.${fileExtension}`;
-  }
-};
-newName = (slug, subText, fileExtension) => {
-  if (subText && subText.length > 0) {
-    return `${slug}-${subText.split(" ").join("-")}.${fileExtension}`;
-  } else {
-    return `${slug}.${fileExtension}`;
-  }
-};
-buildImageUrl = (nName, photoNumber, queryFieldName) => {
-  return `http://${os.hostname()}:${
-    process.env.PORT
-  }/api/image/${nName}?p=${queryFieldName}${photoNumber}`;
-};
-checkSize = (file) => {
-  if (file.size > 200000000) {
-    return res.status(400).json({
-      error: "Image should be less than 2kb in size",
-    });
-  }
-};
+} = require("../utils/productFileRW");
 
-processImage = async (
-  file,
-  slug,
-  subText,
-  photoFolder,
-  resObjs,
-  queryFieldName
-) => {
-  // checkSize(file);
-  // let nNPath = newNameOldPath(
-  //   file,
-  //   slug,
-  //   subText,
-  //   file.path.split("/")[2].split(".")[1]
-  // );
-  // renameFile(file, nNPath, () => {
-  //   console.log("renameFile")
-  // });
-  let nName = newName(slug, subText, file.path.split("/")[2].split(".")[1]);
-  await createLowResProduct(
-    file.path,
-    photoFolder.folderName,
-    nName,
-    resObjs[0]
-  );
-  await createMediumResProduct(
-    file.path,
-    photoFolder.folderName,
-    nName,
-    resObjs[1]
-  );
-  await createHighResProduct(
-    file.path,
-    photoFolder.folderName,
-    nName,
-    resObjs[2]
-  );
-  await unlinkTemporaryFile(file.path);
-  return buildImageUrl(nName, photoFolder.photoNumber, queryFieldName);
-  // createLowResProduct(file.path, photoFileNumber, nName, () => {
-  //   createMediumResProduct(file.path, photoFileNumber, nName, () => {
-  //     createHighResProduct(file.path, photoFileNumber, nName, () => {
-  //       unlinkTemporaryFile(file.path, () => {
-  //         buildImageUrl(nName, (result) => {
-  //           console.log("build insid", result);
-  //           callback(result);
-  //         });
-  //       });
-  //     });
-  //   });
-  // });
-};
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category")
@@ -382,28 +294,17 @@ exports.update = async (req, res) => {
   });
 
   if (files.photo1Url) {
-    console.log("inside photo if")
-
     //  with out exsitance of  photo1Url there is no posibility of  photo2Url or 3 or 4
     if (req.product.photosUrl && req.product.photosUrl.length > 0) {
-      console.log("inside req.product.photosUrl")
-
       for (let i = 0; i < req.product.photosUrl.length; i++) {
-        console.log("inside req.product.photosUrl", i)
-
         unlinkStaticFile(req.product.photosUrl[i]);
       }
     }
   }
   if (files.offerPhoto1Url) {
-    console.log("inside offer if")
     //  with out exsitance of  offerPhoto1Url there is no posibility of  offerPhoto2Url or 3 or 4
     if (req.product.offerPhotosUrl && req.product.offerPhotosUrl.length > 0) {
-      console.log("inside req.product.offerPhotosUrl")
-
       for (let i = 0; i < req.product.offerPhotosUrl.length; i++) {
-        console.log("inside req.product.offerPhotosUrl", i)
-
         unlinkStaticFile(req.product.offerPhotosUrl[i]);
       }
     }

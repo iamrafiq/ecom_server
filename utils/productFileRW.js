@@ -1,8 +1,58 @@
 const fs = require("fs");
 var url = require("url");
 var sharp = require("sharp");
-const { result } = require("lodash");
+var os = require("os");
 
+exports.newName = (slug, subText, fileExtension) => {
+  if (subText && subText.length > 0) {
+    return `${slug}-${subText.split(" ").join("-")}.${fileExtension}`;
+  } else {
+    return `${slug}.${fileExtension}`;
+  }
+};
+exports.buildImageUrl = (nName, photoNumber, queryFieldValue) => {
+  return `http://${os.hostname()}:${
+    process.env.PORT
+  }/api/image/${nName}?p=${queryFieldValue}${photoNumber}`;
+};
+exports.checkSize = (file) => {
+  if (file.size > 200000000) {
+    return res.status(400).json({
+      error: "Image should be less than 2kb in size",
+    });
+  }
+};
+
+exports.processImage = async (
+  file,
+  slug,
+  subText,
+  photoFolder,
+  resObjs,
+  queryFieldName
+) => {
+  let nName = newName(slug, subText, file.path.split("/")[2].split(".")[1]);
+  await exports.createLowResProduct(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[0]
+  );
+  await exports.createMediumResProduct(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[1]
+  );
+  await exports.createHighResProduct(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[2]
+  );
+  await exports.unlinkTemporaryFile(file.path);
+  return exports.buildImageUrl(nName, photoFolder.photoNumber, queryFieldName);
+};
 exports.productPhotoResolutionTypes = [
   // low medium high order is importent
   { width: 80, res: "low" },
@@ -62,8 +112,6 @@ exports.unlinkStaticFile = (photoUrl) => {
     let pathModule = parts.pathname.split("/");
     let fileName = pathModule[pathModule.length - 1];
     console.log("filename..", fileName)
-    let paths = [];
-    //paths.push(`./${process.env.CLIENT_NAME}/images/${parts.query.r}/${pathModule[pathModule.lenght - 1]}`);
     exports.productPhotoResolutionTypes.forEach((element) => {
       exports.productPhotosFolder.forEach((ele) => {
         let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${fileName}`;
