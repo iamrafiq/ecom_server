@@ -31,7 +31,7 @@ exports.processImage = async (
   resObjs,
   queryFieldName
 ) => {
-  let nName = newName(slug, subText, file.path.split("/")[2].split(".")[1]);
+  let nName = exports.newName(slug, subText, file.path.split("/")[2].split(".")[1]);
   await exports.createLowResProduct(
     file.path,
     photoFolder.folderName,
