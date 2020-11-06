@@ -200,30 +200,6 @@ exports.unlinkTemporaryFile = (photoUrl) => {
   } else {
   }
 };
-// exports.unlinkProductStaticFile = (photoUrl) => {
-
-//   if (photoUrl && photoUrl.length > 0) {
-//     var parts = url.parse(photoUrl, true);
-//     let paths = [];
-//     paths.push(`./${process.env.CLIENT_NAME}/images/${parts.query.name}`);
-//     exports.productPhotoResolutionTypes.forEach((element) => {
-//       paths.push(
-//         `./${process.env.CLIENT_NAME}/images/${element.width}/${parts.query.name}`
-//       );
-//     });
-//     paths.forEach((element) => {
-//       if (fs.existsSync(element)) {
-//         try {
-//           fs.unlinkSync(element, function (err) {
-//             console.log("error unlink", err);
-//           });
-//         } catch (err) {
-//           console.log(err);
-//         }
-//       }
-//     });
-//   }
-// };
 
 exports.createLowResProduct = async (
   path,

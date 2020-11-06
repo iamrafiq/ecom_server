@@ -13,6 +13,7 @@ const {
   photoResolutionTypes,
   photosFolder,
   processImage,
+  changeNameOnly,
 } = require("../utils/categoryFileRW");
 
 // buildImageUrl = (field) => {
@@ -326,6 +327,9 @@ exports.update = async (req, res) => {
     );
   }
 
+  if (!files.icon && category.icon && category.icon.length > 0 && fields.slug) {
+    category.icon = changeNameOnly(fields.slug, category.icon, photosFolder[0]);
+  }
   if (files.iconMenu) {
     category.iconMenu = await processImage(
       files.iconMenu,
@@ -334,12 +338,36 @@ exports.update = async (req, res) => {
       photoResolutionTypes
     );
   }
+  if (
+    !files.iconMenu &&
+    category.iconMenu &&
+    category.iconMenu.length > 0 &&
+    fields.slug
+  ) {
+    category.iconMenu = changeNameOnly(
+      fields.slug,
+      category.iconMenu,
+      photosFolder[1]
+    );
+  }
   if (files.thumbnail) {
     category.thumbnail = await processImage(
       files.thumbnail,
       category.slug,
       photosFolder[2],
       photoResolutionTypes
+    );
+  }
+  if (
+    !files.thumbnail &&
+    category.thumbnail &&
+    category.thumbnail.length > 0 &&
+    fields.slug
+  ) {
+    category.thumbnail = changeNameOnly(
+      fields.slug,
+      category.thumbnail,
+      photosFolder[2]
     );
   }
 

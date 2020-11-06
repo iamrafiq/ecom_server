@@ -277,12 +277,6 @@ exports.update = async (req, res) => {
   form.keepExtensions = true;
   form.uploadDir = initClientDir();
   form.multiples = true;
-  // form.parse(req, (err, fields, files) => {
-  //   if (err) {
-  //     return res.status(400).json({
-  //       error: "form data parsing error",
-  //     });
-  //   }
 
   var { fields, files } = await new Promise(function (resolve, reject) {
     form.parse(req, function (err, fields, files) {
@@ -298,8 +292,6 @@ exports.update = async (req, res) => {
     //  with out exsitance of  photo1Url there is no posibility of  photo2Url or 3 or 4
     if (req.product.photosUrl && req.product.photosUrl.length > 0) {
       for (let i = 0; i < req.product.photosUrl.length; i++) {
-        console.log("started unlinking photosUrl")
-
         unlinkStaticFile(req.product.photosUrl[i], true, false);
       }
     }
@@ -309,8 +301,6 @@ exports.update = async (req, res) => {
     //  with out exsitance of  offerPhoto1Url there is no posibility of  offerPhoto2Url or 3 or 4
     if (req.product.offerPhotosUrl && req.product.offerPhotosUrl.length > 0) {
       for (let i = 0; i < req.product.offerPhotosUrl.length; i++) {
-        console.log("started unlinking offerPhotosUrl")
-
         unlinkStaticFile(req.product.offerPhotosUrl[i], false, true);
       }
     }
