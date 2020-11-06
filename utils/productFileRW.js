@@ -12,9 +12,9 @@ exports.newName = (slug, subText, fileExtension) => {
 };
 exports.buildImageUrl = (nName, photoNumber, queryFieldValue) => {
   let nameAndExt = nName.split(".");
-  return `http://${os.hostname()}:${
-    process.env.PORT
-  }/api/image/${nameAndExt[0]}?p=${queryFieldValue}${photoNumber}&ext=${nameAndExt[1]}`;
+  return `http://${os.hostname()}:${process.env.PORT}/api/image/${
+    nameAndExt[0]
+  }?p=${queryFieldValue}${photoNumber}&ext=${nameAndExt[1]}`;
 };
 exports.checkSize = (file) => {
   if (file.size > 200000000) {
@@ -32,7 +32,11 @@ exports.processImage = async (
   resObjs,
   queryFieldName
 ) => {
-  let nName = exports.newName(slug, subText, file.path.split("/")[2].split(".")[1]);
+  let nName = exports.newName(
+    slug,
+    subText,
+    file.path.split("/")[2].split(".")[1]
+  );
   await exports.createLowResProduct(
     file.path,
     photoFolder.folderName,
@@ -113,16 +117,12 @@ exports.unlinkStaticFile = (photoUrl) => {
     let ext = parts.query.ext;
     let pathModule = parts.pathname.split("/");
     let fileName = `${pathModule[pathModule.length - 1]}.${ext}`;
-    
-    console.log("filename..", fileName)
+
     exports.productPhotoResolutionTypes.forEach((element) => {
       exports.productPhotosFolder.forEach((ele) => {
         let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${fileName}`;
-        console.log("path..", path)
 
         if (fs.existsSync(path)) {
-          console.log("exist..", path)
-
           fs.unlinkSync(path, function (err) {
             console.log("error unlink", err);
           });
@@ -130,12 +130,8 @@ exports.unlinkStaticFile = (photoUrl) => {
       });
       exports.productOfferPhotosFolder.forEach((ele) => {
         let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${ele.folderName}/${fileName}`;
-        console.log("offer path..", path)
-
 
         if (fs.existsSync(path)) {
-          console.log("offer exist..", path)
-
           fs.unlinkSync(path, function (err) {
             console.log("error unlink", err);
           });

@@ -4,13 +4,14 @@ var sharp = require("sharp");
 
 var os = require("os");
 
-exports.newName = (slug, fileExtension) => {
-  return `${slug}.${fileExtension}`;
+exports.newName = (adName, fileExtension) => {
+  return `${adName}.${fileExtension}`;
 };
 exports.buildImageUrl = (nName, queryFieldValue) => {
-  return `http://${os.hostname()}:${
-    process.env.PORT
-  }/api/image/${nName}?p=${queryFieldValue}`;
+  let nameAndExt = nName.split(".");
+  return `http://${os.hostname()}:${process.env.PORT}/api/image/${
+    nameAndExt[0]
+  }?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
 };
 exports.checkSize = (file) => {
   if (file.size > 200000000) {
@@ -20,26 +21,39 @@ exports.checkSize = (file) => {
   }
 };
 
-exports.processImage = async (file, slug, photoFolder, resObjs) => {
-  let nName = exports.newName(slug, file.path.split("/")[2].split(".")[1]);
-  await exports.createLowRes(file.path, photoFolder.folderName, nName, resObjs[0]);
-  await exports.createMediumRes(file.path, photoFolder.folderName, nName, resObjs[1]);
-  await exports.createHighRes(file.path, photoFolder.folderName, nName, resObjs[2]);
+exports.processImage = async (file, adName, photoFolder, resObjs) => {
+  let nName = exports.newName(adName, file.path.split("/")[2].split(".")[1]);
+  await exports.createLowRes(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[0]
+  );
+  await exports.createMediumRes(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[1]
+  );
+  await exports.createHighRes(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[2]
+  );
   await exports.unlinkTemporaryFile(file.path);
   return exports.buildImageUrl(nName, photoFolder.folderName);
 };
 
 exports.photoResolutionTypes = [
   // low medium high order is importent
-  { width: 400, res: "low" },
-  { width: 600, res: "medium" },
-  { width: 800, res: "high" },
+  { width: 200, res: "low" },
+  { width: 400, res: "medium" },
+  { width: 700, res: "high" },
 ];
 
 exports.photosFolder = [
-  { photoNumber: 1, folderName: "i" }, // i for icon
-  { photoNumber: 2, folderName: "mi" }, // mi for menu icon
-  { photoNumber: 3, folderName: "t" }, // t for humbnail
+  { photoNumber: 1, folderName: "bah" }, // i for icon
 ];
 
 exports.initClientDir = () => {
@@ -69,11 +83,13 @@ exports.initClientDir = () => {
 exports.unlinkStaticFile = (photoUrl, folderName) => {
   if (photoUrl && photoUrl.length > 0) {
     var parts = url.parse(photoUrl, true);
+    let ext = parts.query.ext;
     let pathModule = parts.pathname.split("/");
-    let fileName = pathModule[pathModule.length - 1];
-    let paths = [];
+    let fileName = `${pathModule[pathModule.length - 1]}.${ext}`;
+
     exports.photoResolutionTypes.forEach((element) => {
       let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${folderName}/${fileName}`;
+
       if (fs.existsSync(path)) {
         fs.unlinkSync(path, function (err) {
           console.log("error unlink", err);

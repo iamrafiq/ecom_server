@@ -2,3 +2,6 @@
 if user remove a image by pressing the delete button delete image from the server. 
 other wise in current system if I uploaded an image wile creating a category it can not be removable 
 by using update option
+
+2. Gurd any names and slug must not contain dot (.) because we are using product , category, advertisement names for 
+associated image name with a dot extenstion, so if a name contain dot operation it will conflict on image name and extension generating

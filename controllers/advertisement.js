@@ -2,44 +2,42 @@ const Advertisement = require("../models/advertisement");
 const lodash = require("lodash"); // for updating fields
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const formidable = require("formidable"); // for uploading image
-const {initClientDir, unlinkStaticFile } =require("../utils/categoryFileRW");
-var os = require("os");
+const {
+  unlinkStaticFile,
+  initClientDir,
+  photoResolutionTypes,
+  photosFolder,
+  processImage,
+} = require("../utils/banerAdHorizontalFileRW");
 
-buildImageUrl= (field) => {
-  return `http://${os.hostname()}:${process.env.PORT}/api/image/?name=${
-   field.path.split("/")[2]
- }`; // building image url to route
-};
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
   console.log("Category Create", req.body);
   let form = new formidable.IncomingForm(); 
   form.keepExtensions = true; 
   form.uploadDir = initClientDir();
-  form.parse(req, (err, fields, files) => {
-    // parsing the form for files and fields
-    if (err) {
-      return res.status(400).json({
-        error: JSON.stringify(err),
-      });
-    }
+  var { fields, files } = await new Promise(function (resolve, reject) {
+    form.parse(req, function (err, fields, files) {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve({ fields, files });
+    }); // form.parse
+  });
     let advertisement = new Advertisement(fields);
 
     if (fields.slugPages) {
-      console.log("slugssss...", fields.slugPages)
       let slugPages = fields.slugPages.split(",");
       advertisement.slugPages = slugPages;
     }
     if (files.photo) {
-      //1kb = 1000
-      //1mb = 1000000
-      if (files.photo.size > 200000000) {
-        return res.status(400).json({
-          error: "Image should be less than 2kb in size",
-        });
-      }
-      advertisement.photo = buildImageUrl(files.photo);
+      advertisement.photo = await processImage(
+        files.photo,
+        advertisement.name,
+        photosFolder[0],
+        photoResolutionTypes
+      );
     }
-
     advertisement
       .save()
       .then((result) => {
@@ -52,7 +50,6 @@ exports.create = (req, res) => {
       .catch((error) => {
         console.log(error);
       });
-  });
 };
 
 exports.advertisementById = (req, res, next, id) => {
@@ -95,7 +92,12 @@ exports.remove = (req, res) => {
   advertisement
     .remove()
     .then((result) => {
-      unlinkStaticFile(result.photo)
+      console.log("adr", result)
+      if (result.photo && result.photo.length > 0) {
+        console.log("ad unlinking")
+
+        unlinkStaticFile(result.photo, photosFolder[0].folderName);
+      }
       res.json({
         //result,
         message: "Advertisement deleted successfully",
@@ -108,20 +110,25 @@ exports.remove = (req, res) => {
     });
 };
 
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
   console.log("advert update");
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
   form.uploadDir = initClientDir();
-  form.parse(req, (err, fields, files) => {
-    // parsing the form for files and fields
-    console.log(err);
-    if (err) {
-      return res.status(400).json({
-        error: JSON.stringify(err),
-      });
+  var { fields, files } = await new Promise(function (resolve, reject) {
+    form.parse(req, function (err, fields, files) {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve({ fields, files });
+    }); // form.parse
+  });
+  if (files.photo) {
+    if (req.advertisements.photo && req.advertisements.photo.length > 0) {
+      unlinkStaticFile(req.advertisements.photo, photosFolder[0].folderName);
     }
-
+  }
     let advertisement = req.advertisements;
     advertisement = lodash.extend(advertisement, fields);
 
@@ -131,15 +138,12 @@ exports.update = (req, res) => {
     }
 
     if (files.photo) {
-      //1kb = 1000
-      //1mb = 1000000
-      if (files.photo.size > 200000000) {
-        return res.status(400).json({
-          error: "Image should be less than 2kb in size",
-        });
-      }
-      unlinkStaticFile(advertisement.photo)
-      advertisement.photo=buildImageUrl(files.photo);
+      advertisement.photo = await processImage(
+        files.photo,
+        advertisement.name,
+        photosFolder[0],
+        photoResolutionTypes
+      );
     }
 
     advertisement
@@ -152,7 +156,6 @@ exports.update = (req, res) => {
           error: JSON.stringify(err),
         });
       });
-  });
 };
 
 exports.list = (req, res) => {

@@ -29,9 +29,10 @@ exports.photo = (req, res) => {
   res.end(req.imageData);
 };
 exports.photoByFileName = (req, res, next, fileName) => {
-  // req.query.res = low / medium / heigh
-  //req.query.p = p1 / p2/ p3/ p4/op1 /op2 / op3/op4 /i /mi/ t
-  let pathToLocalStorage = `${process.env.CLIENT_NAME}/images/${req.query.res}/${req.query.p}/${fileName}`;
+  //req.query.res = low / medium / high
+  //req.query.p = p1 / p2/ p3/ p4/op1 /op2 / op3/op4 /i /mi/ t / bah
+  //req.query.ext = "webp/jpg/png/..."
+  let pathToLocalStorage = `${process.env.CLIENT_NAME}/images/${req.query.res}/${req.query.p}/${fileName}.${req.query.ext}`;
 
   fs.readFile(pathToLocalStorage, (err, imageData) => {
     if (err) {

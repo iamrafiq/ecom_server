@@ -73,7 +73,6 @@ exports.unlinkStaticFile = (photoUrl, folderName) => {
     let ext = parts.query.ext;
     let pathModule = parts.pathname.split("/");
     let fileName = `${pathModule[pathModule.length - 1]}.${ext}`; 
-    let paths = [];
     exports.photoResolutionTypes.forEach((element) => {
       let path = `./${process.env.CLIENT_NAME}/images/${element.res}/${folderName}/${fileName}`;
       if (fs.existsSync(path)) {
