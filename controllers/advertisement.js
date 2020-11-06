@@ -11,7 +11,7 @@ const {
 } = require("../utils/banerAdHorizontalFileRW");
 
 exports.create = async (req, res) => {
-  console.log("Category Create", req.body);
+  console.log("add Create", req.body);
   let form = new formidable.IncomingForm(); 
   form.keepExtensions = true; 
   form.uploadDir = initClientDir();
@@ -25,7 +25,7 @@ exports.create = async (req, res) => {
     }); // form.parse
   });
     let advertisement = new Advertisement(fields);
-
+    console.log("fields..", fields)
     if (fields.slugPages) {
       let slugPages = fields.slugPages.split(",");
       advertisement.slugPages = slugPages;
@@ -33,7 +33,7 @@ exports.create = async (req, res) => {
     if (files.photo) {
       advertisement.photo = await processImage(
         files.photo,
-        advertisement.name,
+        advertisement.slug,
         photosFolder[0],
         photoResolutionTypes
       );
@@ -140,7 +140,7 @@ exports.update = async (req, res) => {
     if (files.photo) {
       advertisement.photo = await processImage(
         files.photo,
-        advertisement.name,
+        advertisement.slug,
         photosFolder[0],
         photoResolutionTypes
       );

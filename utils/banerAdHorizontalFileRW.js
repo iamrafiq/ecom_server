@@ -4,8 +4,8 @@ var sharp = require("sharp");
 
 var os = require("os");
 
-exports.newName = (adName, fileExtension) => {
-  return `${adName}.${fileExtension}`;
+exports.newName = (slug, fileExtension) => {
+  return `${slug}.${fileExtension}`;
 };
 exports.buildImageUrl = (nName, queryFieldValue) => {
   let nameAndExt = nName.split(".");
@@ -21,8 +21,8 @@ exports.checkSize = (file) => {
   }
 };
 
-exports.processImage = async (file, adName, photoFolder, resObjs) => {
-  let nName = exports.newName(adName, file.path.split("/")[2].split(".")[1]);
+exports.processImage = async (file, slug, photoFolder, resObjs) => {
+  let nName = exports.newName(slug, file.path.split("/")[2].split(".")[1]);
   await exports.createLowRes(
     file.path,
     photoFolder.folderName,
