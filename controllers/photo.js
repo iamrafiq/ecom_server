@@ -29,12 +29,10 @@ exports.photo = (req, res) => {
   res.end(req.imageData);
 };
 exports.photoByFileName = (req, res, next, fileName) => {
-  let pathToLocalStorage = "";
-  if (req.r) {
-    pathToLocalStorage = `${process.env.CLIENT_NAME}/images/${req.r}/${fileName}`;
-  } else {
-    pathToLocalStorage = `${process.env.CLIENT_NAME}/images/${fileName}`;
-  }
+  // req.query.res = low / medium / heigh
+  //req.query.p = p1 / p2/ p3/ p4/op1 /op2 / op3/op4
+  let pathToLocalStorage = `${process.env.CLIENT_NAME}/images/${req.query.res}/${req.query.p}/${fileName}`;
+
   fs.readFile(pathToLocalStorage, (err, imageData) => {
     if (err) {
       return res.status(400).json({

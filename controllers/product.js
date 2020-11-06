@@ -7,16 +7,20 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 //const { CallTracker } = require("assert");
 var mongoose = require("mongoose");
 const {
-  unlinkProductStaticFile,
+  unlinkStaticFile,
   initClientDir,
-  productResolutionTypes,
   createLowResProduct,
   renameFile,
   createMediumResProduct,
   createHighResProduct,
   unlinkTemporaryFile,
+  productPhotosFolder,
+  productOfferPhotosFolder,
+  productPhotoResolutionTypes,
+  productOfferPhotoResolutionTypes,
 } = require("../utils/utils");
 var os = require("os");
+const { callbackify } = require("util");
 newNameOldPath = (photo, slug, subText, fileExtension) => {
   let frags = photo.path.split("/");
   if (subText && subText.length > 0) {
@@ -27,10 +31,17 @@ newNameOldPath = (photo, slug, subText, fileExtension) => {
     return `${frags[0]}/${frags[1]}/${slug}.${fileExtension}`;
   }
 };
-buildImageUrl = (path) => {
-  return `http://${os.hostname()}:${process.env.PORT}/api/image/${
-    path.split("/")[2]
-  }?r=${productResolutionTypes.find((ele) => ele.res === "medium").res}`; // building image url to route
+newName = (slug, subText, fileExtension) => {
+  if (subText && subText.length > 0) {
+    return `${slug}-${subText.split(" ").join("-")}.${fileExtension}`;
+  } else {
+    return `${slug}.${fileExtension}`;
+  }
+};
+buildImageUrl = (nName, photoNumber, queryFieldName) => {
+  return `http://${os.hostname()}:${
+    process.env.PORT
+  }/api/image/${nName}?p=${queryFieldName}${photoNumber}`;
 };
 checkSize = (file) => {
   if (file.size > 200000000) {
@@ -40,20 +51,57 @@ checkSize = (file) => {
   }
 };
 
-processImage = async (file, slug, subText) => {
+processImage = async (
+  file,
+  slug,
+  subText,
+  photoFolder,
+  resObjs,
+  queryFieldName
+) => {
   // checkSize(file);
-  let nNPath = newNameOldPath(
-    file,
-    slug,
-    subText,
-    file.path.split("/")[2].split(".")[1]
+  // let nNPath = newNameOldPath(
+  //   file,
+  //   slug,
+  //   subText,
+  //   file.path.split("/")[2].split(".")[1]
+  // );
+  // renameFile(file, nNPath, () => {
+  //   console.log("renameFile")
+  // });
+  let nName = newName(slug, subText, file.path.split("/")[2].split(".")[1]);
+  await createLowResProduct(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[0]
   );
-  renameFile(file, nNPath);
-  await createLowResProduct(nNPath);
-  await createMediumResProduct(nNPath);
-  await createHighResProduct(nNPath);
-  unlinkTemporaryFile(nNPath);
-  return buildImageUrl(nNPath);
+  await createMediumResProduct(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[1]
+  );
+  await createHighResProduct(
+    file.path,
+    photoFolder.folderName,
+    nName,
+    resObjs[2]
+  );
+  await unlinkTemporaryFile(file.path);
+  return buildImageUrl(nName, photoFolder.photoNumber, queryFieldName);
+  // createLowResProduct(file.path, photoFileNumber, nName, () => {
+  //   createMediumResProduct(file.path, photoFileNumber, nName, () => {
+  //     createHighResProduct(file.path, photoFileNumber, nName, () => {
+  //       unlinkTemporaryFile(file.path, () => {
+  //         buildImageUrl(nName, (result) => {
+  //           console.log("build insid", result);
+  //           callback(result);
+  //         });
+  //       });
+  //     });
+  //   });
+  // });
 };
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
@@ -105,10 +153,6 @@ exports.create = async (req, res) => {
         reject(err);
         return;
       }
-      console.log(
-        "within form.parse method, subject field of fields object is: " +
-          fields.subjects
-      );
       resolve({ fields, files });
     }); // form.parse
   });
@@ -141,46 +185,109 @@ exports.create = async (req, res) => {
   }
 
   let photos = [];
+
   if (files.photo1Url) {
     photos.push(
-      await processImage(files.photo1Url, fields.slug, fields.subText)
+      await processImage(
+        files.photo1Url,
+        product.slug,
+        product.subText,
+        productPhotosFolder[0],
+        productPhotoResolutionTypes,
+        "p"
+      )
     );
   }
   if (files.photo2Url) {
     photos.push(
-      await processImage(files.photo2Url, fields.slug, fields.subText)
+      await processImage(
+        files.photo2Url,
+        product.slug,
+        product.subText,
+        productPhotosFolder[1],
+        productPhotoResolutionTypes,
+        "p"
+      )
     );
   }
   if (files.photo3Url) {
     photos.push(
-      await processImage(files.photo3Url, fields.slug, fields.subText)
+      await processImage(
+        files.photo3Url,
+        product.slug,
+        product.subText,
+        productPhotosFolder[2],
+        productPhotoResolutionTypes,
+        "p"
+      )
     );
   }
   if (files.photo4Url) {
     photos.push(
-      await processImage(files.photo4Url, fields.slug, fields.subText)
+      await processImage(
+        files.photo4Url,
+        product.slug,
+        product.subText,
+        productPhotosFolder[3],
+        productPhotoResolutionTypes,
+        "p"
+      )
     );
   }
 
-  let offecrPhotos = [];
+  let offerPhotos = [];
+
   if (files.offerPhoto1Url) {
-    checkSize(files.offerPhoto1Url);
-    offecrPhotos.push(buildImageUrl(files.offerPhoto1Url));
+    offerPhotos.push(
+      await processImage(
+        files.offerPhoto1Url,
+        product.slug,
+        product.subText,
+        productOfferPhotosFolder[0],
+        productOfferPhotoResolutionTypes,
+        "op"
+      )
+    );
   }
   if (files.offerPhoto2Url) {
-    checkSize(files.offerPhoto2Url);
-    offecrPhotos.push(buildImageUrl(files.offerPhoto2Url));
+    offerPhotos.push(
+      await processImage(
+        files.offerPhoto2Url,
+        product.slug,
+        product.subText,
+        productOfferPhotosFolder[1],
+        productOfferPhotoResolutionTypes,
+        "op"
+      )
+    );
   }
   if (files.offerPhoto3Url) {
-    checkSize(files.offerPhoto3Url);
-    offecrPhotos.push(buildImageUrl(files.offerPhoto3Url));
+    offerPhotos.push(
+      await processImage(
+        files.offerPhoto3Url,
+        product.slug,
+        product.subText,
+        productOfferPhotosFolder[2],
+        productOfferPhotoResolutionTypes,
+        "op"
+      )
+    );
   }
   if (files.offerPhoto4Url) {
-    checkSize(files.offerPhoto4Url);
-    offecrPhotos.push(buildImageUrl(files.offerPhoto4Url));
+    offerPhotos.push(
+      await processImage(
+        files.offerPhoto4Url,
+        product.slug,
+        product.subText,
+        productOfferPhotosFolder[3],
+        productOfferPhotoResolutionTypes,
+        "op"
+      )
+    );
   }
+
   product.photosUrl = photos;
-  product.offerPhotosUrl = offecrPhotos;
+  product.offerPhotosUrl = offerPhotos;
 
   product
     .save()
@@ -210,12 +317,12 @@ exports.remove = (req, res) => {
     .then((result) => {
       if (result.photosUrl && result.photosUrl.length > 0) {
         for (let i = 0; i < result.photosUrl.length; i++) {
-          unlinkProductStaticFile(result.photosUrl[i]);
+          unlinkStaticFile(result.photosUrl[i]);
         }
       }
       if (result.offerPhotosUrl && result.offerPhotosUrl.length > 0) {
         for (let i = 0; i < result.offerPhotosUrl.length; i++) {
-          unlinkProductStaticFile(result.offerPhotosUrl[i]);
+          unlinkStaticFile(result.offerPhotosUrl[i]);
         }
       }
       var bulk = Category.collection.initializeUnorderedBulkOp();
@@ -251,123 +358,212 @@ exports.remove = (req, res) => {
   // });
 };
 
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
   console.log("update.....");
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
   form.uploadDir = initClientDir();
   form.multiples = true;
-  form.parse(req, (err, fields, files) => {
-    if (err) {
-      return res.status(400).json({
-        error: "form data parsing error",
-      });
-    }
+  // form.parse(req, (err, fields, files) => {
+  //   if (err) {
+  //     return res.status(400).json({
+  //       error: "form data parsing error",
+  //     });
+  //   }
 
-    let photos = [];
-    if (files.photo1Url) {
-      checkSize(files.photo1Url);
-      photos.push(buildImageUrl(files.photo1Url));
-      createLowRes(files.photo1Url);
-    }
-    if (files.photo2Url) {
-      checkSize(files.photo2Url);
-      photos.push(buildImageUrl(files.photo2Url));
-      createLowRes(files.photo2Url);
-    }
-    if (files.photo3Url) {
-      checkSize(files.photo3Url);
-      photos.push(buildImageUrl(files.photo3Url));
-      createLowRes(files.photo3Url);
-    }
-    if (files.photo4Url) {
-      checkSize(files.photo4Url);
-      photos.push(buildImageUrl(files.photo4Url));
-      createLowRes(files.photo4Url);
-    }
-
-    let offecrPhotos = [];
-    if (files.offerPhoto1Url) {
-      checkSize(files.offerPhoto1Url);
-      offecrPhotos.push(buildImageUrl(files.offerPhoto1Url));
-    }
-    if (files.offerPhoto2Url) {
-      checkSize(files.offerPhoto2Url);
-      offecrPhotos.push(buildImageUrl(files.offerPhoto2Url));
-    }
-    if (files.offerPhoto3Url) {
-      checkSize(files.offerPhoto3Url);
-      offecrPhotos.push(buildImageUrl(files.offerPhoto3Url));
-    }
-    if (files.offerPhoto4Url) {
-      checkSize(files.offerPhoto4Url);
-      offecrPhotos.push(buildImageUrl(files.offerPhoto4Url));
-    }
-
-    if (photos) {
-      if (req.product.photosUrl && req.product.photosUrl.length > 0) {
-        for (let i = 0; i < req.product.photosUrl.length; i++) {
-          unlinkProductStaticFile(req.product.photosUrl[i]);
-        }
+  var { fields, files } = await new Promise(function (resolve, reject) {
+    form.parse(req, function (err, fields, files) {
+      if (err) {
+        reject(err);
+        return;
       }
-    }
-    if (offecrPhotos) {
-      if (req.product.offerPhotosUrl && req.product.offerPhotosUrl.length > 0) {
-        for (let i = 0; i < req.product.offerPhotosUrl.length; i++) {
-          unlinkProductStaticFile(req.product.offerPhotosUrl[i]);
-        }
-      }
-    }
-    /**fisrt unlinking photos if there then loadasing */
-    let product = req.product;
-    product = lodash.extend(product, fields);
-
-    if (fields.cats) {
-      const cats = fields.cats.split(",");
-      product.categories = cats;
-    }
-    if (fields.rc) {
-      const recursiveCats = fields.rc.split(",");
-      product.recursiveCategories = recursiveCats;
-    }
-
-    if (fields.relatedProducts) {
-      const relatedProducts = fields.relatedProducts.split(",");
-      product.relatedProducts = relatedProducts;
-    }
-
-    product.photosUrl = photos;
-    product.offerPhotosUrl = offecrPhotos;
-
-    product
-      .save()
-      .then((result) => {
-        var bulk = Category.collection.initializeUnorderedBulkOp();
-        bulk
-          .find({
-            products: result._id,
-          })
-          .update({ $pull: { products: result._id } }, { multi: true });
-
-        bulk.execute(() => {
-          Category.updateMany(
-            { _id: { $in: product.categories } },
-            { $push: { products: result._id } }
-          )
-            .then((results) => {
-              res.json(result);
-            })
-            .catch((error) => {
-              return res.status(400).json({
-                error: errorHandler(error),
-              });
-            });
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      resolve({ fields, files });
+    }); // form.parse
   });
+
+  if (files.photo1Url) {
+    console.log("inside photo if")
+
+    //  with out exsitance of  photo1Url there is no posibility of  photo2Url or 3 or 4
+    if (req.product.photosUrl && req.product.photosUrl.length > 0) {
+      console.log("inside req.product.photosUrl")
+
+      for (let i = 0; i < req.product.photosUrl.length; i++) {
+        console.log("inside req.product.photosUrl", i)
+
+        unlinkStaticFile(req.product.photosUrl[i]);
+      }
+    }
+  }
+  if (files.offerPhoto1Url) {
+    console.log("inside offer if")
+    //  with out exsitance of  offerPhoto1Url there is no posibility of  offerPhoto2Url or 3 or 4
+    if (req.product.offerPhotosUrl && req.product.offerPhotosUrl.length > 0) {
+      console.log("inside req.product.offerPhotosUrl")
+
+      for (let i = 0; i < req.product.offerPhotosUrl.length; i++) {
+        console.log("inside req.product.offerPhotosUrl", i)
+
+        unlinkStaticFile(req.product.offerPhotosUrl[i]);
+      }
+    }
+  }
+  /**fisrt unlinking photos if there, then loadasing */
+  let product = req.product;
+  product = lodash.extend(product, fields);
+
+  if (fields.cats) {
+    const cats = fields.cats.split(",");
+    product.categories = cats;
+  }
+  if (fields.rc) {
+    const recursiveCats = fields.rc.split(",");
+    product.recursiveCategories = recursiveCats;
+  }
+
+  if (fields.relatedProducts) {
+    const relatedProducts = fields.relatedProducts.split(",");
+    product.relatedProducts = relatedProducts;
+  }
+
+  let photos = [];
+
+  if (files.photo1Url) {
+    photos.push(
+      await processImage(
+        files.photo1Url,
+        product.slug,
+        product.subText,
+        productPhotosFolder[0],
+        productPhotoResolutionTypes,
+        "p"
+      )
+    );
+  }
+  if (files.photo2Url) {
+    photos.push(
+      await processImage(
+        files.photo2Url,
+        product.slug,
+        product.subText,
+        productPhotosFolder[1],
+        productPhotoResolutionTypes,
+        "p"
+      )
+    );
+  }
+  if (files.photo3Url) {
+    photos.push(
+      await processImage(
+        files.photo3Url,
+        product.slug,
+        product.subText,
+        productPhotosFolder[2],
+        productPhotoResolutionTypes,
+        "p"
+      )
+    );
+  }
+  if (files.photo4Url) {
+    photos.push(
+      await processImage(
+        files.photo4Url,
+        product.slug,
+        product.subText,
+        productPhotosFolder[3],
+        productPhotoResolutionTypes,
+        "p"
+      )
+    );
+  }
+
+  let offerPhotos = [];
+
+  if (files.offerPhoto1Url) {
+    offerPhotos.push(
+      await processImage(
+        files.offerPhoto1Url,
+        product.slug,
+        product.subText,
+        productOfferPhotosFolder[0],
+        productOfferPhotoResolutionTypes,
+        "op"
+      )
+    );
+  }
+  if (files.offerPhoto2Url) {
+    offerPhotos.push(
+      await processImage(
+        files.offerPhoto2Url,
+        product.slug,
+        product.subText,
+        productOfferPhotosFolder[1],
+        productOfferPhotoResolutionTypes,
+        "op"
+      )
+    );
+  }
+  if (files.offerPhoto3Url) {
+    offerPhotos.push(
+      await processImage(
+        files.offerPhoto3Url,
+        product.slug,
+        product.subText,
+        productOfferPhotosFolder[2],
+        productOfferPhotoResolutionTypes,
+        "op"
+      )
+    );
+  }
+  if (files.offerPhoto4Url) {
+    offerPhotos.push(
+      await processImage(
+        files.offerPhoto4Url,
+        product.slug,
+        product.subText,
+        productOfferPhotosFolder[3],
+        productOfferPhotoResolutionTypes,
+        "op"
+      )
+    );
+  }
+
+  if (photos.length> 0){
+    product.photosUrl = photos;
+  }
+  if (offerPhotos){
+    product.offerPhotosUrl = offerPhotos;
+  }
+
+  product
+    .save()
+    .then((result) => {
+      var bulk = Category.collection.initializeUnorderedBulkOp();
+      bulk
+        .find({
+          products: result._id,
+        })
+        .update({ $pull: { products: result._id } }, { multi: true });
+
+      bulk.execute(() => {
+        Category.updateMany(
+          { _id: { $in: product.categories } },
+          { $push: { products: result._id } }
+        )
+          .then((results) => {
+            res.json(result);
+          })
+          .catch((error) => {
+            return res.status(400).json({
+              error: errorHandler(error),
+            });
+          });
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  // });
 };
 
 // exports.update = (req, res) => {
