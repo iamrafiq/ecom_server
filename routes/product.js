@@ -11,7 +11,7 @@ router.post('/product/create/:userId', requireSignin, isAuth, isAdmin,  create);
 router.delete('/product/:productId/:userId', requireSignin, isAuth, isAdmin, remove);
 router.put('/product/:productId/:userId', requireSignin, isAuth, isAdmin, update);
 router.get('/products', list);
-router.get('/allproducts', list);
+router.get('/allproducts', getAllProducts);
 router.get('/products/search', listSearch)
 router.get('/products/by/category/:categoryId', productsByCategory)
 router.get('/products/related/:productId', listRelated)

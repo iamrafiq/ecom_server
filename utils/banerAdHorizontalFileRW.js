@@ -72,6 +72,7 @@ exports.photoResolutionTypes = [
 
 exports.photosFolder = [
   {folderName: "bah" }, // bah for banner ad horizontal
+  {folderName: "bahbn" }, // bah for banner ad horizontal for bangla
 ];
 
 exports.initClientDir = () => {

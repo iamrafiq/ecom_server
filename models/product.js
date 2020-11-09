@@ -32,16 +32,12 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    subText: {
+    subText: { 
       type: String,
       trim: true,
     },
     mrp: {
       // original body price
-      type: Number,
-      // required: true,
-    },
-    price: {
       type: Number,
       // required: true,
     },
@@ -91,7 +87,7 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
 
-    shortDesc: {
+    shortDesc: { 
       type: String,
       trim: true,
       maxlength: 500,

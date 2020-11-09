@@ -22,6 +22,9 @@ const advertisementSchema = new mongoose.Schema(
     photo: {
       type: String,
     },
+    photoBangla: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
