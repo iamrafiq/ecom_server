@@ -15,6 +15,8 @@ const braintreeRoutes = require("./routes/braintree");
 const orderRoutes = require("./routes/order");
 const advertisementRoutes = require("./routes/advertisement");
 const photoRoutes = require("./routes/photo");
+const homeRoutes = require("./routes/home");
+
 
 
 //app
@@ -55,6 +57,8 @@ app.use("/api", braintreeRoutes);
 app.use("/api", orderRoutes);
 app.use("/api", advertisementRoutes);
 app.use("/api", photoRoutes);
+app.use("/api", homeRoutes);
+
 
 // app.get('/', (req, res)=>{
 //     res.send('hello from node');

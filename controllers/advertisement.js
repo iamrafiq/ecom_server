@@ -50,14 +50,12 @@ exports.create = async (req, res) => {
   advertisement
     .save()
     .then((result) => {
-      //add  the sub cat id to its parent
-      if (result.name === "root") {
-        res.json(result);
-      }
       res.json(result);
     })
     .catch((error) => {
-      console.log(error);
+      return res.status(400).json({
+        error: "Unable to create advertisiment",
+      });
     });
 };
 

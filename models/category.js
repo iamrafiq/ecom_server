@@ -17,6 +17,20 @@ const categorySchema = new mongoose.Schema(
       maxlength: 64,
       unique: true,
     },
+    nameFull: {
+      type: String,
+      trim: true,
+      maxlength: 64,
+    },
+    bengaliNameFull: {
+      type: String,
+      trim: true,
+      maxlength: 64,
+    },
+    showHome: {
+      type: Number,
+      default: 0,
+    },
     slug: {
       type: String,
       required: true,

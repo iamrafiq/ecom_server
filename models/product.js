@@ -32,7 +32,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    subText: { 
+    subText: {
       type: String,
       trim: true,
     },
@@ -45,7 +45,12 @@ const productSchema = new mongoose.Schema(
       type: Number,
       // required: true,
     },
+
     applyDiscounts: {
+      type: Number,
+      default: 0,
+    },
+    applyOffer: {
       type: Number,
       default: 0,
     },
@@ -87,7 +92,7 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
 
-    shortDesc: { 
+    shortDesc: {
       type: String,
       trim: true,
       maxlength: 500,

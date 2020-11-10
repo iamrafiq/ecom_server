@@ -61,7 +61,7 @@ exports.create = async (req, res) => {
   //     error: "Slug should be unique",
   //   });
   // }
-
+  categorySchema
   let category = new Category(fields);
 
   if (fields.recursiveCats) {
@@ -124,7 +124,9 @@ exports.create = async (req, res) => {
       });
     })
     .catch((error) => {
-      console.log(error);
+      return res.status(400).json({
+        error: "Unable to create category",
+      });
     });
 };
 
