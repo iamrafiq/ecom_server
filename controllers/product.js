@@ -781,3 +781,17 @@ exports.productsByCategory = (req, res) => {
     res.json(products);
   }).select("-photo");
 };
+
+exports.getOfferProducts = (req, res, next) => {
+  const query = {applyOffer:1};
+  Product.find(query, (err, products) => {
+    console.log(err);
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    }
+    req.offerProducts = products;
+    next();
+  }).select("-photo");
+};

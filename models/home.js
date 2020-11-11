@@ -23,6 +23,12 @@ const homeSchema = new mongoose.Schema(
         type: Object,
       },
     ],
+    offerProducts:{
+      type: Object,
+    },
+    categoryTree:{
+      type: Object,
+    },
     userComments: [
       {
         // using middleware loaded first five comments from user comments table sort by comment sort logic by comment model

@@ -213,3 +213,17 @@ exports.list = (req, res) => {
     res.json(data);
   });
 };
+
+exports.advertisementsByHomeSlug = (req, res, next, slug) => {
+  Advertisement.find({ slugPages: "home" })
+    .select("-slugPages")
+    .exec((err, data) => {
+      if (err || !data) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+      req.advertisements = data;
+      next();
+    });
+};

@@ -23,7 +23,7 @@ router.put('/category/:categoryId/:userId', requireSignin, isAuth, isAdmin, upda
 router.get('/categories/',  list);
 // router.get('/categories-with-products/',  categoriesWithProducts);
 
-router.get('/categories/tree',  tree);
+// router.get('/categories/tree',  tree);
 router.get(`/image`, photo)
 
 // router.get(`/images/icon-menu/:categoryId`, iconMenu)

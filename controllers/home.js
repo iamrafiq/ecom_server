@@ -100,6 +100,7 @@ exports.read = (req, res) => {
 };
 
 exports.getHome = (req, res) => {
+  console.log("getHomeWithAll")
   Home.find().exec((err, data) => {
     if (err || data.length === 0) {
       return res.status(400).json({
@@ -107,9 +108,13 @@ exports.getHome = (req, res) => {
       });
     }
     data[0].advertisements = req.advertisements;
+    data[0].offerProducts = req.offerProducts;
+    data[0].categoryTree = req.tree;
+
     res.json(data[0]);
   });
 };
+
 exports.update = async (req, res) => {
   let form = new formidable.IncomingForm(); // all the form data will be available with the new incoming form
   form.keepExtensions = true; // what ever image type is getting extentions will be there
