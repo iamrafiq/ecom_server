@@ -517,8 +517,8 @@ exports.list = (req, res) => {
 exports.tree = (req, res, next) => {
   console.log("home call tree")
   Category.find()
-    .populate("parent")
-    // .select("-icon -thumbnail")
+     .populate("parent")
+     .select("-products")
     .sort("order")
     .exec((err, data) => {
       if (err) {
@@ -526,30 +526,7 @@ exports.tree = (req, res, next) => {
           error: errorHandler(err),
         });
       }
-
-      const idMapping = data.reduce((acc, el, i) => {
-        acc[el._id] = i;
-        return acc;
-      }, {});
-
-      let root = "";
-      data.forEach((el) => {
-        // Handle the root element
-        if (!el.parent || el.parent === null) {
-          root = el;
-          return;
-        }
-        // Use our mapping to locate the parent element in our data array
-        const parentEl = data[idMapping[el.parent._id]];
-        // Add our current el to its parent's `children` array
-        parentEl.children = [...(parentEl.children || []), el];
-      });
-
-      if (root.children) {
-        req.tree = root.children;
-      } else {
-        req.tree = root;
-      }
+      req.categories = data;
       next();
     });
 };

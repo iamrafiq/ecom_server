@@ -26,7 +26,7 @@ const homeSchema = new mongoose.Schema(
     offerProducts:{
       type: Object,
     },
-    categoryTree:{
+    categories:{
       type: Object,
     },
     userComments: [

@@ -109,7 +109,7 @@ exports.getHome = (req, res) => {
     }
     data[0].advertisements = req.advertisements;
     data[0].offerProducts = req.offerProducts;
-    data[0].categoryTree = req.tree;
+    data[0].categories = req.categories;
 
     res.json(data[0]);
   });
