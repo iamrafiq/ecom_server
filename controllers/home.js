@@ -43,7 +43,7 @@ exports.create = async (req, res) => {
   });
 
   let home = new Home(fields);
-  let photoFeatures = [];
+  let photoTutorial = [];
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
       home.photoLanding = await processImage(
@@ -53,8 +53,8 @@ exports.create = async (req, res) => {
         photosFolder[0],
         photoResolutionTypeslanding
       );
-    } else if (allFiles[i].field === "photoFeatures") {
-      photoFeatures.push(
+    } else if (allFiles[i].field === "photoTutorial") {
+      photoTutorial.push(
         await processImage(
           i,
           allFiles[i].file,
@@ -66,8 +66,8 @@ exports.create = async (req, res) => {
     }
   }
 
-  if (photoFeatures.length > 0) {
-    home.photoFeatures = photoFeatures;
+  if (photoTutorial.length > 0) {
+    home.photoTutorial = photoTutorial;
   }
 
   home
@@ -199,14 +199,12 @@ const updateGallery = async (req, res, fields, allFiles) => {
 };
 const updateMainForm = async (req, res, fields, allFiles) => {
   let unLinkPhotoLanding = false;
-  let unlinkPhotoFeatures = false;
+  let unlinkPhotoTutorial = false;
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
       unLinkPhotoLanding = true;
-      console.log("unlinkstatic landing", unLinkPhotoLanding);
-    } else if (allFiles[i].field === "photoFeatures") {
-      unlinkPhotoFeatures = true;
-      console.log("unlinkstatic feture", unlinkPhotoFeatures);
+    } else if (allFiles[i].field === "photoTutorial") {
+      unlinkPhotoTutorial = true;
     }
   }
   if (unLinkPhotoLanding) {
@@ -214,17 +212,17 @@ const updateMainForm = async (req, res, fields, allFiles) => {
       unlinkStaticFile(req.home.photoLanding, photosFolder[0].folderName);
     }
   }
-  if (unlinkPhotoFeatures) {
-    if (req.home.photoFeatures && req.home.photoFeatures.length > 0) {
-      for (let j = 0; j < req.home.photoFeatures.length; j++) {
-        unlinkStaticFile(req.home.photoFeatures[j], photosFolder[1].folderName);
+  if (unlinkPhotoTutorial) {
+    if (req.home.photoTutorial && req.home.photoTutorial.length > 0) {
+      for (let j = 0; j < req.home.photoTutorial.length; j++) {
+        unlinkStaticFile(req.home.photoTutorial[j], photosFolder[1].folderName);
       }
     }
   }
   let home = req.home;
   home = lodash.extend(home, fields);
 
-  let photoFeatures = [];
+  let photoTutorial = [];
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
       home.photoLanding = await processImage(
@@ -234,8 +232,8 @@ const updateMainForm = async (req, res, fields, allFiles) => {
         photosFolder[0],
         photoResolutionTypeslanding
       );
-    } else if (allFiles[i].field === "photoFeatures") {
-      photoFeatures.push(
+    } else if (allFiles[i].field === "photoTutorial") {
+      photoTutorial.push(
         await processImage(
           i,
           allFiles[i].file,
@@ -247,8 +245,8 @@ const updateMainForm = async (req, res, fields, allFiles) => {
     }
   }
 
-  if (photoFeatures.length > 0) {
-    home.photoFeatures = photoFeatures;
+  if (photoTutorial.length > 0) {
+    home.photoTutorial = photoTutorial;
   }
 
   home
