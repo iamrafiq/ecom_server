@@ -73,6 +73,12 @@ exports.photoResolutionTypes = [
   { width: 400, res: "medium" },
   { width: 700, res: "high" },
 ];
+exports.photoResolutionTypesTutorial = [
+  // low medium high order is importent
+  { width: 200, res: "low" },
+  { width: 400, res: "medium" },
+  { width: 650, res: "high" },
+];
 exports.photoResolutionGallery = [
   // low medium high order is importent
   { width: 200, res: "low" },
@@ -88,7 +94,7 @@ exports.photoResolutionTypeslanding = [
 
 exports.photosFolder = [
   { folderName: "pl" }, // pl photo landing for home
-  { folderName: "pfs" }, // pfs photo featurs for home
+  { folderName: "pfs" }, // pfs photo tutorial
   { folderName: "hg" }, // hg gallery for home
 ];
 

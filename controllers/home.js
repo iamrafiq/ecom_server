@@ -13,6 +13,7 @@ const {
   photoResolutionTypes,
   photoResolutionTypeslanding,
   photoResolutionGallery,
+  photoResolutionTypesTutorial,
   photosFolder,
   processImage,
   changeNameOnly,
@@ -44,6 +45,7 @@ exports.create = async (req, res) => {
 
   let home = new Home(fields);
   let photoTutorial = [];
+  let photoTutorialBengali = [];
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
       home.photoLanding = await processImage(
@@ -60,7 +62,17 @@ exports.create = async (req, res) => {
           allFiles[i].file,
           home.title,
           photosFolder[1],
-          photoResolutionTypes
+          photoResolutionTypesTutorial
+        )
+      );
+    } else if (allFiles[i].field === "photoTutorialBengali") {
+      photoTutorialBengali.push(
+        await processImage(
+          i,
+          allFiles[i].file,
+          home.title,
+          photosFolder[1],
+          photoResolutionTypesTutorial
         )
       );
     }
@@ -69,7 +81,9 @@ exports.create = async (req, res) => {
   if (photoTutorial.length > 0) {
     home.photoTutorial = photoTutorial;
   }
-
+  if (photoTutorialBengali.length > 0) {
+    home.photoTutorialBengali = photoTutorialBengali;
+  }
   home
     .save()
     .then((result) => {
@@ -100,7 +114,7 @@ exports.read = (req, res) => {
 };
 
 exports.getHome = (req, res) => {
-  console.log("getHomeWithAll")
+  console.log("getHomeWithAll");
   Home.find().exec((err, data) => {
     if (err || data.length === 0) {
       return res.status(400).json({
@@ -148,12 +162,11 @@ exports.update = async (req, res) => {
 const updateGallery = async (req, res, fields, allFiles) => {
   let gallery = [];
   if (fields.actionG === "true") {
-    console.log("deleting", fields.gId)
+    console.log("deleting", fields.gId);
     let delObj = req.home.gallery.find((x) => x._id.toString() === fields.gId);
     unlinkStaticFile(delObj.photoG, photosFolder[2].folderName);
     gallery = req.home.gallery.filter((x) => x._id.toString() !== fields.gId);
-    console.log("gallery", gallery)
-
+    console.log("gallery", gallery);
   } else {
     let g = {};
     g.titleG = fields.titleG;
@@ -172,10 +185,10 @@ const updateGallery = async (req, res, fields, allFiles) => {
       }
     }
     gallery.push(g);
-    console.log("req.gallery", req.home.gallery)
+    console.log("req.gallery", req.home.gallery);
     if (req.home.gallery) {
-      for (let j = 0; j < req.home.gallery.length; j++){
-        console.log("req.gallery pusing")
+      for (let j = 0; j < req.home.gallery.length; j++) {
+        console.log("req.gallery pusing");
 
         gallery.push(req.home.gallery[j]);
       }
@@ -200,11 +213,15 @@ const updateGallery = async (req, res, fields, allFiles) => {
 const updateMainForm = async (req, res, fields, allFiles) => {
   let unLinkPhotoLanding = false;
   let unlinkPhotoTutorial = false;
+  let unlinkPhotoTutorialBengali = false;
+
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
       unLinkPhotoLanding = true;
     } else if (allFiles[i].field === "photoTutorial") {
       unlinkPhotoTutorial = true;
+    } else if (allFiles[i].field === "photoTutorialBengali") {
+      unlinkPhotoTutorialBengali = true;
     }
   }
   if (unLinkPhotoLanding) {
@@ -219,10 +236,25 @@ const updateMainForm = async (req, res, fields, allFiles) => {
       }
     }
   }
+  if (unlinkPhotoTutorialBengali) {
+    if (
+      req.home.photoTutorialBengali &&
+      req.home.photoTutorialBengali.length > 0
+    ) {
+      for (let j = 0; j < req.home.photoTutorialBengali.length; j++) {
+        unlinkStaticFile(
+          req.home.photoTutorialBengali[j],
+          photosFolder[1].folderName
+        );
+      }
+    }
+  }
   let home = req.home;
   home = lodash.extend(home, fields);
 
   let photoTutorial = [];
+  let photoTutorialBengali = [];
+
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
       home.photoLanding = await processImage(
@@ -239,7 +271,17 @@ const updateMainForm = async (req, res, fields, allFiles) => {
           allFiles[i].file,
           home.title,
           photosFolder[1],
-          photoResolutionTypes
+          photoResolutionTypesTutorial
+        )
+      );
+    } else if (allFiles[i].field === "photoTutorialBengali") {
+      photoTutorialBengali.push(
+        await processImage(
+          i,
+          allFiles[i].file,
+          home.title,
+          photosFolder[1],
+          photoResolutionTypesTutorial
         )
       );
     }
@@ -248,7 +290,9 @@ const updateMainForm = async (req, res, fields, allFiles) => {
   if (photoTutorial.length > 0) {
     home.photoTutorial = photoTutorial;
   }
-
+  if (photoTutorialBengali.length > 0) {
+    home.photoTutorialBengali = photoTutorialBengali;
+  }
   home
     .save()
     .then((result) => {
