@@ -51,7 +51,7 @@ exports.create = async (req, res) => {
       home.photoLanding = await processImage(
         i,
         allFiles[i].file,
-        home.title,
+        home.title.replace(" ", "-"),
         photosFolder[0],
         photoResolutionTypeslanding
       );
@@ -60,7 +60,7 @@ exports.create = async (req, res) => {
         await processImage(
           i,
           allFiles[i].file,
-          home.title,
+          home.title.replace(" ", "-"),
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -70,7 +70,7 @@ exports.create = async (req, res) => {
         await processImage(
           i,
           allFiles[i].file,
-          home.title,
+          home.title.replace(" ", "-"),
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -178,7 +178,7 @@ const updateGallery = async (req, res, fields, allFiles) => {
         g.photoG = await processImage(
           -1,
           allFiles[i].file,
-          fields.titleG,
+          fields.titleG.replace(" ", "-"),
           photosFolder[2],
           photoResolutionGallery
         );
@@ -260,7 +260,7 @@ const updateMainForm = async (req, res, fields, allFiles) => {
       home.photoLanding = await processImage(
         i,
         allFiles[i].file,
-        home.title,
+        home.title.replace(" ", "-"),
         photosFolder[0],
         photoResolutionTypeslanding
       );
@@ -269,7 +269,7 @@ const updateMainForm = async (req, res, fields, allFiles) => {
         await processImage(
           i,
           allFiles[i].file,
-          home.title,
+          home.title.replace(" ", "-"),
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -279,7 +279,7 @@ const updateMainForm = async (req, res, fields, allFiles) => {
         await processImage(
           i,
           allFiles[i].file,
-          home.title,
+          home.title.replace(" ", "-"),
           photosFolder[1],
           photoResolutionTypesTutorial
         )
