@@ -11,6 +11,7 @@ const {
   unlinkStaticFile,
   initClientDir,
   photoResolutionTypes,
+  photoResolutionTypesLogo,
   photoResolutionTypeslanding,
   photoResolutionGallery,
   photoResolutionTypesTutorial,
@@ -54,6 +55,14 @@ exports.create = async (req, res) => {
         home.title.replace(" ", "-"),
         photosFolder[0],
         photoResolutionTypeslanding
+      );
+    } else if (allFiles[i].field === "logo") {
+      home.logo = await processImage(
+        i,
+        allFiles[i].file,
+        "logo",
+        photosFolder[3],
+        photoResolutionTypesLogo
       );
     } else if (allFiles[i].field === "photoTutorial") {
       photoTutorial.push(
@@ -212,6 +221,7 @@ const updateGallery = async (req, res, fields, allFiles) => {
 };
 const updateMainForm = async (req, res, fields, allFiles) => {
   let unLinkPhotoLanding = false;
+  let unLinkLogo = false;
   let unlinkPhotoTutorial = false;
   let unlinkPhotoTutorialBengali = false;
 
@@ -222,11 +232,18 @@ const updateMainForm = async (req, res, fields, allFiles) => {
       unlinkPhotoTutorial = true;
     } else if (allFiles[i].field === "photoTutorialBengali") {
       unlinkPhotoTutorialBengali = true;
+    }else if (allFiles[i].field === "logo") {
+      unLinkLogo = true;
     }
   }
   if (unLinkPhotoLanding) {
     if (req.home.photoLanding && req.home.photoLanding.length > 0) {
       unlinkStaticFile(req.home.photoLanding, photosFolder[0].folderName);
+    }
+  }
+  if (unLinkLogo) {
+    if (req.home.logo && req.home.logo.length > 0) {
+      unlinkStaticFile(req.home.logo, photosFolder[3].folderName);
     }
   }
   if (unlinkPhotoTutorial) {
@@ -263,6 +280,14 @@ const updateMainForm = async (req, res, fields, allFiles) => {
         home.title.replace(" ", "-"),
         photosFolder[0],
         photoResolutionTypeslanding
+      );
+    } else if (allFiles[i].field === "logo") {
+      home.logo = await processImage(
+        -1,
+        allFiles[i].file,
+        "logo",
+        photosFolder[3],
+        photoResolutionTypesLogo
       );
     } else if (allFiles[i].field === "photoTutorial") {
       photoTutorial.push(

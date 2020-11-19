@@ -12,7 +12,7 @@ exports.signup = (req, res) => {
     user.save((err, user)=>{
         if(err){
             return res.status(400).json({
-                err:errorHandler(err)
+                error:errorHandler(err)
             })
         }
 
@@ -27,23 +27,23 @@ exports.signup = (req, res) => {
 
 
 exports.signin = (req, res)=>{
-    //find the user based on email
-    const {email, password} = req.body;
-    User.findOne({email},(err, user)=>{
+    //find the user based on userId
+    const {userId, password} = req.body;
+    User.findOne({userId},(err, user)=>{
         if (err || !user){
             return res.status(400).json({
-                error: 'User with that email dose not exist. Please signup'
+                error: 'User dose not exist. Please signup'
             })
         }
 
         //const user = new User;
     //user.purr();
-    // if user is is found make sure email and password matched
+    // if user is is found make sure userId and password matched
     //Create authenticate method in user model
     //user1 = new User;
     if (!user.authenticate(password)){
         return res.status(401).json({
-            error: 'Email or Password not matched'
+            error: 'User not found'
         })
     }
     //generate a signed token with user id and secrate
@@ -52,7 +52,7 @@ exports.signin = (req, res)=>{
     res.cookie('t', token, {expire: new Date() + 9999}) ; // here 9999 in seconds
     // Now return response with user and token to frontend client
     const {_id, name, role} = user;
-    return res.json({token, user:{_id, name, email, role}});
+    return res.json({token, user:{_id, name, userId, role}});
 
     });
 }

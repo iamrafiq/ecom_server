@@ -73,6 +73,12 @@ exports.photoResolutionTypes = [
   { width: 400, res: "medium" },
   { width: 700, res: "high" },
 ];
+exports.photoResolutionTypesLogo = [
+  // low medium high order is importent
+  { width: 100, res: "low" },
+  { width: 150, res: "medium" },
+  { width: 200, res: "high" },
+];
 exports.photoResolutionTypesTutorial = [
   // low medium high order is importent
   { width: 200, res: "low" },
@@ -96,6 +102,7 @@ exports.photosFolder = [
   { folderName: "pl" }, // pl photo landing for home
   { folderName: "pfs" }, // pfs photo tutorial
   { folderName: "hg" }, // hg gallery for home
+  { folderName: "lg" }, // lg logo for home
 ];
 
 exports.initClientDir = () => {

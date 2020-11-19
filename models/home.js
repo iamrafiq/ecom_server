@@ -35,6 +35,9 @@ const homeSchema = new mongoose.Schema(
         type: Object,
       },
     ],
+    logo: {
+      type: String,
+    },
     photoLanding: {
       type: String,
     },

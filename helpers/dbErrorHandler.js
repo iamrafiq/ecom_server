@@ -1,20 +1,20 @@
 exports.errorHandler = error =>{
-    // let message ="";
+    let message ="";
     
-    // if (error.code ){
-    //     switch (error.code){
-    //         case 11000:
-    //             if (error.keyValue.email != null){
-    //                 message = `Duplicate email address ${error.keyValue.email}, already exists!`;
-    //             }
-    //             if (error.keyValue.name != null){
-    //                 message = `Duplicate ${error.keyValue.name}, already exists!`;
-    //             }
-    //             break;
-    //         default:
-    //             message = "Something went wrong";
-    //     }
-    // }
+    if (error && error.code ){
+        switch (error.code){
+            case 11000:
+                if (error.keyValue.userId != null){
+                    message = `${error.keyValue.userId}, already exists!`;
+                }
+                // if (error.keyValue.name != null){
+                //     message = `Duplicate ${error.keyValue.name}, already exists!`;
+                // }
+                break;
+            default:
+                message = JSON.stringify(error);
+        }
+    }
 
-    return JSON.stringify(error);
+    return message;
 }
