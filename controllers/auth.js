@@ -5,8 +5,8 @@ const expressJwt = require('express-jwt')// for authorization check
 const { body, validationResult } = require('express-validator');
 const user = require('../models/user');
 
-exports.signup = (req, res) => {
-    console.log('req.body',req.body);
+exports.saveUser = (req, res, next) => {
+    // console.log('req.body',req.body);
     
     const user = new User(req.body);
     user.save((err, user)=>{
@@ -18,14 +18,18 @@ exports.signup = (req, res) => {
 
         user.salt = undefined;
         user.hashed_password = undefined;
-
-        res.json({
-            user
-        })
+        req.user = user;
+        req.body.userId = user.userId;
+        next();
+        
     });
 };  
 
-
+exports.signup = (req, res)=>{
+     res.json({
+      user:req.user,
+    });
+}
 exports.signin = (req, res)=>{
     //find the user based on userId
     const {userId, password} = req.body;

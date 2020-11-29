@@ -16,6 +16,7 @@ const orderRoutes = require("./routes/order");
 const advertisementRoutes = require("./routes/advertisement");
 const photoRoutes = require("./routes/photo");
 const homeRoutes = require("./routes/home");
+const otpRoutes = require("./routes/userOtp");
 
 
 
@@ -58,6 +59,7 @@ app.use("/api", orderRoutes);
 app.use("/api", advertisementRoutes);
 app.use("/api", photoRoutes);
 app.use("/api", homeRoutes);
+app.use("/api", otpRoutes);
 
 
 // app.get('/', (req, res)=>{
