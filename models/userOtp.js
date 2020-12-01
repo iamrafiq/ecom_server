@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const userOTPSchema = new mongoose.Schema({
-    userId:{
+    phoneNumber:{
         type:String,
         trim: true,
         maxlength:32

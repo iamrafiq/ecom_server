@@ -61,12 +61,16 @@ app.use("/api", photoRoutes);
 app.use("/api", homeRoutes);
 app.use("/api", otpRoutes);
 
-
 // app.get('/', (req, res)=>{
 //     res.send('hello from node');
 // });
-
 const port = process.env.PORT || 8000;
+
 app.listen(port,"0.0.0.0" ,() => {
   console.log(`Server is running on port ${port}`);
 });
+
+// const port = process.env.PORT || 8000;
+// app.listen(port,"0.0.0.0" ,() => {
+//   console.log(`Server is running on port ${port}`);
+// });

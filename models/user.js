@@ -4,17 +4,25 @@ const { v4: uuidv4 } = require("uuid");
 
 const userSchema = new mongoose.Schema(
   {
+    
     name: {
       type: String,
       trim: true,
       maxlength: 32,
     },
-    userId: {
+    phoneNumber: {
       type: String,
       trim: true,
       required: true,
       unique: true,
     },
+    checkoutAddress: [
+      {
+        id:String,
+        area: String,
+        address: String,
+      },
+    ],
     hashed_password: {
       type: String,
       required: true,

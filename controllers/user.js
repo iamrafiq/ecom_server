@@ -15,17 +15,17 @@ exports.userById = (req, res, next, id) => {
   });
 };
 
-exports.findUserByUserId = (req, res, next) => {
-  const {userId} = req.body;
-  console.log("findUserByUserId", req.body)
-  User.findOne({userId:{$eq:userId}}).exec((err, user) => {
+exports.findUserByPhoneNumber = (req, res, next) => {
+  const {phoneNumber} = req.body;
+  console.log("findUserByPhoneNumber", req.body)
+  User.findOne({phoneNumber:{$eq:phoneNumber}}).exec((err, user) => {
     if (err || !user) {
       return res.status(400).json({
         error: "User not found",
       });
     }
 
-    req.profile = user; // adding the user object in a new object named profile and assigned it to the req object
+    req.user = user; // adding the user object in a new object named profile and assigned it to the req object
     next();
   });
 };
