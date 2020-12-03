@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0, // 0 - ai user, 1 - signed up user, 2 - verified user
     },
+    passwordProtected:{
+      type: Number,
+      default: 0, // 0 - none, 1 - passwordProtected
+    },
     name: {
       type: String,
       trim: true,
