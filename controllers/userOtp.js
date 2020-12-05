@@ -4,10 +4,14 @@ const axios = require("axios");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const { body, validationResult } = require("express-validator");
 const UserAiId = require("../models/userAiId");
+const jwt = require("jsonwebtoken"); // to generate signin token
+const expressJwt = require("express-jwt"); // for authorization check
 
 exports.verify = (req, res) => {
   //find the user based on phoneNumber
-  const { phoneNumber, otp } = req.body;
+  const { phoneNumber, otp, aiId } = req.body;
+
+  console.log("veryfiing aid requested:", aiId);
   UserOtp.findOne(
     {
       phoneNumber,
@@ -27,8 +31,7 @@ exports.verify = (req, res) => {
 
       console.log("req.profile", req.user);
       const user = new User(req.user);
-      user.verified = 1;
-      user.status = 2;
+      // user.status = 2;
       console.log("user...", user);
 
       user.save((err, user) => {
@@ -40,31 +43,112 @@ exports.verify = (req, res) => {
         console.log("saved user: ", user);
         user.salt = undefined;
         user.hashed_password = undefined;
-        const {aiId} = user;
-        
-        UserAiId.findOne({ aiId }, (err, aiIdUser) => {
-          if (err || !aiIdUser) {
-            return res.status(400).json({
-              error: "user not found with aiId:" + err,
-            });
-          }
-
-          aiIdUser.verified = 1;
-          aiIdUser.save((err, aiIdUser) => {
+        User.findOne(
+          { aiId: { $eq: aiId }, phoneNumber: { $eq: null } },
+          (err, userTemp) => {
             if (err) {
               return res.status(400).json({
-                error: errorHandler(err),
+                error:
+                  "OTP verification failed, please resend OTP again.",
+                success: false,
               });
             }
+            if (userTemp) {
+              userTemp
+                .remove()
+                .then((result) => {
+                  sendResponce(res, user);
+                })
+                .catch((error) => {
+                  return res.status(400).json({
+                    error: errorHandler(err),
+                  });
+                });
+            } else {
+              sendResponce(res, user);
+            }
+          }
+        );
 
-            res.json({
-              user,
-            });
-          });
-        });
+        // UserAiId.findOne({ aiId }, (err, aiIdUser) => {
+        //   if (err || !aiIdUser) {
+        //     return res.status(400).json({
+        //       error: "user not found with aiId:" + err,
+        //     });
+        //   }
+
+        //   const {
+        //     _id,
+        //     name,
+        //     phoneNumber,
+        //     role,
+        //     aiId,
+        //     passwordProtected,
+        //     status,
+        //   } = user;
+        //   const verified = 1;
+        //   aiIdUser.save((err, aiIdUser) => {
+        //     if (err) {
+        //       return res.status(400).json({
+        //         error: errorHandler(err),
+        //       });
+        //     }
+        //     const token  = generateToken(res, user);
+
+        //     res.json({
+        //       token,
+        //       user:  {
+        //         _id,
+        //         name,
+        //         verified,
+        //         phoneNumber,
+        //         role,
+        //         aiId,
+        //         passwordProtected,
+        //         status,
+        //       },
+        //     });
+        //   });
+        // });
       });
     }
   );
+};
+
+const sendResponce = (res, user) => {
+  const {
+    _id,
+    name,
+    phoneNumber,
+    role,
+    aiId,
+    passwordProtected,
+    status,
+  } = user;
+
+  const verified = 1;
+  const token = generateToken(res, user);
+
+  res.json({
+    token,
+    user: {
+      _id,
+      name,
+      verified,
+      phoneNumber,
+      role,
+      aiId,
+      passwordProtected,
+      status,
+    },
+  });
+};
+const generateToken = (res, user) => {
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+  // persist the token as 't' in cookie with expriy date
+  res.cookie("t", token, { expire: new Date() + 9999 }); // here 9999 in seconds
+  // Now return response with user and token to frontend client
+  return token;
 };
 
 exports.otpSent = (req, res) => {
@@ -123,6 +207,7 @@ const otpCallToServer = (req, res, next) => {
           }
           // req.otp = userOtp;
           req.otpSent = true;
+          req.user = user;
           next();
         })
         .catch((error) => {
@@ -136,17 +221,5 @@ const otpCallToServer = (req, res, next) => {
 };
 exports.sendOtp = (req, res, next) => {
   console.log("send otp...1");
-  const { newMachine } = req.body;
-  const user = req.user;
-  if (user.verified === 1) {
-    // if verfied user want to sign in
-    if (newMachine) {
-      otpCallToServer(req, res, next);
-    } else {
-      next();
-    }
-  } else {
-    // new user signup, unverified old user
-    otpCallToServer(req, res, next);
-  }
+  otpCallToServer(req, res, next);
 };

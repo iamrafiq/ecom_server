@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     },
     status:{
       type: Number,
-      default: 0, // 0 - ai user, 1 - signed up user, 2 - verified user
+      default: 0, // 0 - ai user, 1 - signed up user,
     },
     passwordProtected:{
       type: Number,
@@ -44,10 +44,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    verified: {
-      type: Number,
-      default: 0,
-    },
+    // verified: {
+    //   type: Number,
+    //   default: 0,
+    // },
     history: {
       type: Array,
       default: [],

@@ -23,25 +23,49 @@ exports.createAIUser = (req, res) => {
         error: errorHandler(err),
       });
     }
-    const userAiId = new UserAiId();
-    userAiId.aiId = aiId;
-    userAiId.verified = 0;
-
-    userAiId.save((err, user) => {
-      if (err) {
-        return res.status(400).json({
-          error: errorHandler(err),
-        });
-      }
-      res.json({
-        user,
-      });
+    /**** */
+    const {
+      _id,
+      name,
+      phoneNumber,
+      role,
+      aiId,
+      passwordProtected,
+      status,
+    } = user;
+    const verified = 0;
+    res.json({
+      user: {
+        _id,
+        name,
+        phoneNumber,
+        role,
+        aiId,
+        passwordProtected,
+        status,
+        verified,
+      },
     });
+    // const userAiId = new UserAiId();
+    // userAiId.aiId = aiId;
+    // userAiId.verified = 0;
+    // userAiId.save((err, user) => {
+    //   if (err) {
+    //     return res.status(400).json({
+    //       error: errorHandler(err),
+    //     });
+    //   }
+    //   const unverfiedUser = user;
+    //   unverfiedUser.verified = 0;
+    //   res.json({
+    //     user: unverfiedUser,
+    //   });
+    // });
   });
 };
-exports.saveUser = (req, res, next) => {
+exports.signup = (req, res, next) => {
   console.log("req.body", req.body);
-
+  // create a new aiId if old one is in already verified
   const { aiId, phoneNumber } = req.body;
 
   if (phoneNumber) {
@@ -61,6 +85,7 @@ exports.saveUser = (req, res, next) => {
           }
 
           user = lodash.extend(user, req.body);
+          user.status = 1;
           user.save((err, user) => {
             if (err) {
               return res.status(400).json({
@@ -70,25 +95,26 @@ exports.saveUser = (req, res, next) => {
             user.salt = undefined;
             user.hashed_password = undefined;
             req.user = user;
+             /**** */
+            next();
+            // UserAiId.findOne({ aiId }, (err, aiIdUser) => {
+            //   if (err || !aiIdUser) {
+            //     return res.status(400).json({
+            //       error: "user not found with aiId:" + err,
+            //     });
+            //   }
 
-            UserAiId.findOne({ aiId }, (err, aiIdUser) => {
-              if (err || !aiIdUser) {
-                return res.status(400).json({
-                  error: "user not found with aiId:" + err,
-                });
-              }
-
-              aiIdUser.userId = phoneNumber;
-              aiIdUser.save((err, aiIdUser) => {
-                if (err) {
-                  return res.status(400).json({
-                    error: errorHandler(err),
-                  });
-                }
-
-                next();
-              });
-            });
+            //   aiIdUser.userId = phoneNumber;
+            //   aiIdUser.save((err, aiIdUser) => {
+            //     if (err) {
+            //       return res.status(400).json({
+            //         error: errorHandler(err),
+            //       });
+            //     }
+            //     req.aiId = aiIdUser;
+            //     next();
+            //   });
+            // });
           });
         });
       } else {
@@ -103,15 +129,37 @@ exports.saveUser = (req, res, next) => {
     });
   }
 };
-exports.signup = (req, res) => {
+exports.signupResponce = (req, res) => {
+  const {
+    _id,
+    name,
+    phoneNumber,
+    role,
+    aiId,
+    passwordProtected,
+    status,
+  } = req.user;
+  const verified = 0;
   res.json({
-    user: req.user,
+    user: {
+      _id,
+      name,
+      phoneNumber,
+      role,
+      verified,
+      aiId,
+      passwordProtected,
+      status,
+      verified,
+    },
   });
 };
 
-exports.pullUser = (req, res, next) => {
+exports.signin = (req, res, next) => {
   //find the user based on phoneNumber
-  const { phoneNumber, aiId } = req.body;
+  const phoneNumber = req.body.phoneNumber;
+  const reqAiId = req.body.aiId;
+  console.log("reqAiId came from user:", reqAiId);
   if (phoneNumber) {
     User.findOne({ phoneNumber }, (err, user) => {
       if (err || !user) {
@@ -119,25 +167,60 @@ exports.pullUser = (req, res, next) => {
           error: "User dose not exist. Please signup",
         });
       }
+      const { _id, name, phoneNumber, role, passwordProtected, status, aiId } = user;
 
-      if (user.verified) {
-        // verified user
-        UserAiId.findOne({ aiId }, (err, aiIdUser) => {
-          if (err || !aiIdUser) {
-            return res.status(400).json({
-              error: "user not found with aiId:" + err,
-            });
-          }
-
-          if (aiId.verified) {
-            // verified user old machine
-          } else {
-            // verified user new machine
-          }
-        });
-      } else {
-        // signed up user but not verified
+      /**
+       * 
+       */
+      if (aiId !== reqAiId){
+        // signed out user or new machine
       }
+      const verified = 0;
+      req.user = {
+        _id,
+        name,
+        phoneNumber,
+        role,
+        verified,
+        aiId: reqAiId, // until verify new aiId use it new aiId, if user verfy this new aiId then delete it
+        passwordProtected,
+        status,
+      };
+
+      next();
+
+      // UserAiId.findOne({ aiId: { $eq: reqAiId } }, (err, aiIdUser) => {
+      //   if (err || !aiIdUser) {
+      //     return res.status(400).json({
+      //       error: "user not found with aiId:" + err,
+      //     });
+      //   }
+
+      //   console.log("signed in user with aid not verified", reqAiId);
+
+      //   aiIdUser.userId = phoneNumber;
+      //   aiIdUser.save((err, aiIdUser) => {
+      //     if (err) {
+      //       return res.status(400).json({
+      //         error: errorHandler(err),
+      //       });
+      //     }
+      //     // req.aiId = aiIdUser;
+      //     const verified = 0;
+      //     req.user = {
+      //       _id,
+      //       name,
+      //       phoneNumber,
+      //       role,
+      //       verified,
+      //       aiId: reqAiId, // untile verify new aiId use it new aiId, if user verfy this new aiId then delete it
+      //       passwordProtected,
+      //       status,
+      //     };
+
+      //     next();
+      //   });
+     // });
 
       //const user = new User;
       //user.purr();
@@ -150,19 +233,19 @@ exports.pullUser = (req, res, next) => {
       //   });
       // }
 
-      if (user.verified === 1) {
-        // only verified user will recived token
-        //generate a signed token with user id and secrate
-        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-        // persist the token as 't' in cookie with expriy date
-        res.cookie("t", token, { expire: new Date() + 9999 }); // here 9999 in seconds
-        // Now return response with user and token to frontend client
-        req.token = token;
-      }
+      // if (user.verified === 1) {
+      //   // only verified user will recived token
+      //   //generate a signed token with user id and secrate
+      //   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+      //   // persist the token as 't' in cookie with expriy date
+      //   res.cookie("t", token, { expire: new Date() + 9999 }); // here 9999 in seconds
+      //   // Now return response with user and token to frontend client
+      //   req.token = token;
+      // }
 
-      req.user = user;
-      console.log("pull user:", user);
-      next();
+      // req.user = user;
+      // console.log("pull user:", user);req.token =
+      // next();
     });
   } else {
     return res.status(400).json({
@@ -170,7 +253,14 @@ exports.pullUser = (req, res, next) => {
     });
   }
 };
-exports.signin = (req, res) => {
+const generateToken = (req, res, user) => {
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+  // persist the token as 't' in cookie with expriy date
+  res.cookie("t", token, { expire: new Date() + 9999 }); // here 9999 in seconds
+  // Now return response with user and token to frontend client
+  return token;
+};
+const signinResponce = (req, res) => {
   const {
     _id,
     name,
@@ -185,7 +275,8 @@ exports.signin = (req, res) => {
   if (req.otpSent) {
     otpSent = true;
   }
-  res.json({
+
+  return {
     otpSent,
     token: req.token,
     user: {
@@ -197,9 +288,42 @@ exports.signin = (req, res) => {
       aiId,
       passwordProtected,
       status,
-      aiId,
+      verified,
     },
-  });
+  };
+};
+exports.signinWithOtp = (req, res) => {
+  const { otpSent, token, user } = signinResponce(req, res);
+  res.json({ otpSent, token, user });
+  // const {
+  //   _id,
+  //   name,
+  //   phoneNumber,
+  //   role,
+  //   verified,
+  //   aiId,
+  //   passwordProtected,
+  //   status,
+  // } = req.user;
+  // let otpSent = undefined;
+  // if (req.otpSent) {
+  //   otpSent = true;
+  // }
+  // res.json({
+  //   otpSent,
+  //   token: req.token,
+  //   user: {
+  //     _id,
+  //     name,
+  //     phoneNumber,
+  //     role,
+  //     verified,
+  //     aiId,
+  //     passwordProtected,
+  //     status,
+  //     aiId,
+  //   },
+  // });
 };
 // exports.signin = (req, res)=>{
 //     //find the user based on userId
