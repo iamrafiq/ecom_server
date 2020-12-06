@@ -31,7 +31,6 @@ exports.verify = (req, res) => {
 
       console.log("req.profile", req.user);
       const user = new User(req.user);
-      // user.status = 2;
       console.log("user...", user);
 
       user.save((err, user) => {
@@ -69,47 +68,6 @@ exports.verify = (req, res) => {
             }
           }
         );
-
-        // UserAiId.findOne({ aiId }, (err, aiIdUser) => {
-        //   if (err || !aiIdUser) {
-        //     return res.status(400).json({
-        //       error: "user not found with aiId:" + err,
-        //     });
-        //   }
-
-        //   const {
-        //     _id,
-        //     name,
-        //     phoneNumber,
-        //     role,
-        //     aiId,
-        //     passwordProtected,
-        //     status,
-        //   } = user;
-        //   const verified = 1;
-        //   aiIdUser.save((err, aiIdUser) => {
-        //     if (err) {
-        //       return res.status(400).json({
-        //         error: errorHandler(err),
-        //       });
-        //     }
-        //     const token  = generateToken(res, user);
-
-        //     res.json({
-        //       token,
-        //       user:  {
-        //         _id,
-        //         name,
-        //         verified,
-        //         phoneNumber,
-        //         role,
-        //         aiId,
-        //         passwordProtected,
-        //         status,
-        //       },
-        //     });
-        //   });
-        // });
       });
     }
   );
@@ -180,7 +138,6 @@ const otpCallToServer = (req, res, next) => {
         .then((res) => {
           // console.log(`statusCode: ${res.statusCode}`);
           // console.log(res);
-          console.log("send otp...after  api call");
 
           if (!userOtp) {
             const userOtp = new UserOtp();
@@ -220,6 +177,5 @@ const otpCallToServer = (req, res, next) => {
   );
 };
 exports.sendOtp = (req, res, next) => {
-  console.log("send otp...1");
   otpCallToServer(req, res, next);
 };

@@ -11,14 +11,15 @@ exports.orderById = (req, res, next, id) => {
       }
 
       req.order = order;
-    });
+    });   
     next();
 };
 exports.create = (req, res) => {
-  // console.log('create order', req.body)
+  //  console.log('create order', JSON.parse(req.body.order.products))
+   console.log('create order user', req.profile)
   req.body.order.user = req.profile;
   const order = new Order(req.body.order);
-
+  console.log("order ppp", order);
   order.save((error, data) => {
     if (error) {
       return res.status(400).json({

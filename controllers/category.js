@@ -62,7 +62,7 @@ exports.create = async (req, res) => {
   //     error: "Slug should be unique",
   //   });
   // }
-  categorySchema;
+  // categorySchema;
   let category = new Category(fields);
 
   if (fields.recursiveCats) {
