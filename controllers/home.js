@@ -125,16 +125,19 @@ exports.read = (req, res) => {
 exports.getHome = (req, res) => {
   console.log("getHomeWithAll");
   Home.find().exec((err, data) => {
-    if (err || data.length === 0) {
+    if (err) {
       return res.status(400).json({
-        error: "Home not found",
+        error: errorHandler(err),
       });
     }
-    data[0].advertisements = req.advertisements;
-    data[0].offerProducts = req.offerProducts;
-    data[0].categories = req.categories;
-
-    res.json(data[0]);
+    if (data.length  > 0) {
+      data[0].advertisements = req.advertisements;
+      data[0].offerProducts = req.offerProducts;
+      data[0].categories = req.categories;
+      res.json(data[0]);
+    } else {
+      res.json(null);
+    }  
   });
 };
 
@@ -232,7 +235,7 @@ const updateMainForm = async (req, res, fields, allFiles) => {
       unlinkPhotoTutorial = true;
     } else if (allFiles[i].field === "photoTutorialBengali") {
       unlinkPhotoTutorialBengali = true;
-    }else if (allFiles[i].field === "logo") {
+    } else if (allFiles[i].field === "logo") {
       unLinkLogo = true;
     }
   }
