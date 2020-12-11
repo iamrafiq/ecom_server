@@ -22,6 +22,7 @@ const OrderSchema = new mongoose.Schema(
     amount: { type: Number },
     address: String,
     contactNumber:String,
+    name:String,
     status: {
       type: String,
       default: "Not processed",
