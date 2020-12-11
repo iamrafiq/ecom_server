@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
+var winston = require('./config/winston');
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -42,7 +43,7 @@ mongoose
   });
 
 //middleware
-app.use(morgan("dev"));
+app.use(morgan('combined', { stream: winston.stream }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 //app.use(expressValidator());
