@@ -151,7 +151,7 @@ exports.createLowRes = async (path, photoFolderName, newName, resObj) => {
       fit: sharp.fit.contain,
       width: resObj.width,
     })
-    .webp({ quality: 50 })
+    .webp({ quality: 100 })
     .toFile(
       `./${frags[0]}/${frags[1]}/${resObj.res}/${photoFolderName}/${newName}`
     );
@@ -163,7 +163,7 @@ exports.createMediumRes = async (path, photoFolderName, newName, resObj) => {
       fit: sharp.fit.contain,
       width: resObj.width,
     })
-    .webp({ quality: 50 })
+    .webp({ quality: 100 })
     .toFile(
       `./${frags[0]}/${frags[1]}/${resObj.res}/${photoFolderName}/${newName}`
     );

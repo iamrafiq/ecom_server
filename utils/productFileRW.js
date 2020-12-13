@@ -216,7 +216,7 @@ exports.createLowResProduct = async (
       fit: sharp.fit.contain,
       width: resObj.width,
     })
-    .webp({ quality: 50 })
+    .webp({ quality: 100 })
     .toFile(
       `./${frags[0]}/${frags[1]}/${resObj.res}/${photoFileNumber}/${newName}`
     );
@@ -233,7 +233,7 @@ exports.createMediumResProduct = async (
       fit: sharp.fit.contain,
       width: resObj.width,
     })
-    .webp({ quality: 50 })
+    .webp({ quality: 100 })
     .toFile(
       `./${frags[0]}/${frags[1]}/${resObj.res}/${photoFileNumber}/${newName}`
     );
