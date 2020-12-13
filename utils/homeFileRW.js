@@ -1,7 +1,6 @@
 const fs = require("fs");
 var url = require("url");
 var sharp = require("sharp");
-
 var os = require("os");
 
 exports.newName = (index, slug, fileExtension) => {
@@ -12,10 +11,18 @@ exports.newName = (index, slug, fileExtension) => {
   }
 };
 exports.buildImageUrl = (nName, queryFieldValue) => {
+
   let nameAndExt = nName.split(".");
-  return `http://${os.hostname()}:${process.env.PORT}/api/image/${
-    nameAndExt[0]
-  }?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
+  if (process.env.BUILD_TYPE === "dev"){
+    return `http://${os.hostname()}:${process.env.PORT}/api/image/${
+      nameAndExt[0]
+    }?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
+  }else{
+    return `http://${os.hostname()}.com:${process.env.PORT}/api/image/${
+      nameAndExt[0]
+    }?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
+  }
+  
 };
 exports.checkSize = (file) => {
   if (file.size > 200000000) {

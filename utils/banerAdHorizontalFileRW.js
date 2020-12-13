@@ -9,9 +9,15 @@ exports.newName = (slug, fileExtension) => {
 };
 exports.buildImageUrl = (nName, queryFieldValue) => {
   let nameAndExt = nName.split(".");
-  return `http://${os.hostname()}:${process.env.PORT}/api/image/${
-    nameAndExt[0]
-  }?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
+  if (process.env.BUILD_TYPE === "dev") {
+    return `http://${os.hostname()}:${process.env.PORT}/api/image/${
+      nameAndExt[0]
+    }?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
+  } else {
+    return `http://${os.hostname()}.com:${process.env.PORT}/api/image/${
+      nameAndExt[0]
+    }?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
+  }
 };
 exports.checkSize = (file) => {
   if (file.size > 200000000) {
@@ -20,11 +26,7 @@ exports.checkSize = (file) => {
     });
   }
 };
-exports.changeNameOnly = (
-  newName,
-  photoUrl,
-  photoFolder,
-) => {
+exports.changeNameOnly = (newName, photoUrl, photoFolder) => {
   var parts = url.parse(photoUrl, true);
   let ext = parts.query.ext;
   let pathModule = parts.pathname.split("/");
@@ -71,8 +73,8 @@ exports.photoResolutionTypes = [
 ];
 
 exports.photosFolder = [
-  {folderName: "bah" }, // bah for banner ad horizontal
-  {folderName: "bahbn" }, // bah for banner ad horizontal for bangla
+  { folderName: "bah" }, // bah for banner ad horizontal
+  { folderName: "bahbn" }, // bah for banner ad horizontal for bangla
 ];
 
 exports.initClientDir = () => {

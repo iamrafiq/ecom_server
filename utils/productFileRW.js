@@ -15,13 +15,15 @@ exports.buildImageUrl = (nName, photoNumber, queryFieldValue) => {
 
   let nameWithExt = nName.split(".");
   console.log("renaming....nameAndExt", nameWithExt);
-
-  let newUrl = `http://${os.hostname()}:${process.env.PORT}/api/image/${
-    nameWithExt[0]
-  }?p=${queryFieldValue}${photoNumber}&ext=${nameWithExt[1]}`;
-  console.log("renaming....newUrl", newUrl);
-
-  return newUrl;
+  if (process.env.BUILD_TYPE === "dev") {
+    return `http://${os.hostname()}:${process.env.PORT}/api/image/${
+      nameWithExt[0]
+    }?p=${queryFieldValue}${photoNumber}&ext=${nameWithExt[1]}`;
+  } else {
+    return `http://${os.hostname()}.com:${process.env.PORT}/api/image/${
+      nameWithExt[0]
+    }?p=${queryFieldValue}${photoNumber}&ext=${nameWithExt[1]}`;
+  }
 };
 exports.checkSize = (file) => {
   if (file.size > 200000000) {
