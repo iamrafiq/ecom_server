@@ -80,9 +80,9 @@ exports.processImage = async (file, slug, photoFolder, resObjs) => {
 
 exports.photoResolutionTypes = [
   // low medium high order is importent
-  { width: 34, res: "low" },
-  { width: 100, res: "medium" },
-  { width: 200, res: "high" },
+  { width: 128, res: "low" },
+  { width: 200, res: "medium" },
+  { width: 400, res: "high" },
 ];
 
 exports.photosFolder = [

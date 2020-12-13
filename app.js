@@ -43,7 +43,13 @@ mongoose
   });
 
 //middleware
-app.use(morgan('combined', { stream: winston.stream }));
+if (process.env.BUILD_TYPE==="dev"){
+  app.use(morgan('dev'));
+
+}else{
+  app.use(morgan('combined', { stream: winston.stream }));
+}
+// app.use(morgan('combined', { stream: winston.stream }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 //app.use(expressValidator());
