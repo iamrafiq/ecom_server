@@ -105,14 +105,14 @@ exports.processImage = async (
 };
 exports.productPhotoResolutionTypes = [
   // low medium high order is importent
-  { width: 80, res: "low" },
-  { width: 200, res: "medium" },
-  { width: 400, res: "high" },
+  { width: 200, res: "low" },
+  { width: 400, res: "medium" },
+  { width: 800, res: "high" },
 ];
 exports.productOfferPhotoResolutionTypes = [
-  { width: 120, res: "low" },
-  { width: 250, res: "medium" },
-  { width: 500, res: "high" },
+  { width: 200, res: "low" },
+  { width: 400, res: "medium" },
+  { width: 800, res: "high" },
 ];
 exports.productPhotosFolder = [
   { photoNumber: 1, folderName: "p1" },
