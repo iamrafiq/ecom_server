@@ -23,7 +23,7 @@ exports.productById = (req, res, next, id) => {
     .exec((err, product) => {
       if (err || !product || product.length <= 0) {
         return res.status(400).json({
-          error: "Product not found",
+          error: errorHandler(err),
         });
       }
 
@@ -220,7 +220,7 @@ exports.create = async (req, res) => {
     })
     .catch((error) => {
       return res.status(400).json({
-        error: "Unable to create product",
+        error: errorHandler(error),
       });
     });
   // });
@@ -596,7 +596,7 @@ exports.list = (req, res) => {
     .exec((err, products) => {
       if (err) {
         return res.status(400).json({
-          error: "Products not found",
+          error: errorHandler(err),
         });
       }
       res.json(products);
@@ -611,7 +611,7 @@ exports.getAllProducts = (req, res) => {
     .exec((err, products) => {
       if (err) {
         return res.status(400).json({
-          error: "Products not found",
+          error: errorHandler(error),
         });
       }
       res.json(products);

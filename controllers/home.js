@@ -100,7 +100,7 @@ exports.create = async (req, res) => {
     })
     .catch((error) => {
       return res.status(400).json({
-        error: "Unable to create home",
+        error: errorHandler(error),
       });
     });
 };
@@ -328,7 +328,7 @@ const updateMainForm = async (req, res, fields, allFiles) => {
     })
     .catch((error) => {
       return res.status(400).json({
-        error: "Unable to create home",
+        error: errorHandler(error),
       });
     });
 };

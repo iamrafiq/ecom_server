@@ -57,7 +57,7 @@ exports.orderDetails = (req, res) => {
     res.json(req.order);
   }else{
     return res.status(400).json({
-      error: "no order found",
+      error: errorHandler(error),
     });
   }
 };

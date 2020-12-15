@@ -54,7 +54,7 @@ exports.create = async (req, res) => {
     })
     .catch((error) => {
       return res.status(400).json({
-        error: "Unable to create advertisiment",
+        error: errorHandler(error),
       });
     });
 };

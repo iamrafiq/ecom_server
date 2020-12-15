@@ -126,7 +126,7 @@ exports.create = async (req, res) => {
     })
     .catch((error) => {
       return res.status(400).json({
-        error: "Unable to create category",
+        error: errorHandler(error),
       });
     });
 };
