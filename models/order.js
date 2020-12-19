@@ -20,9 +20,9 @@ const OrderSchema = new mongoose.Schema(
     products: [CartItemSchema],
     transaction_id: {},
     amount: { type: Number },
-    address: String,
+    contactAddress: String,
     contactNumber:String,
-    name:String,
+    contactName:String,
     status: {
       type: String,
       default: "Not processed",

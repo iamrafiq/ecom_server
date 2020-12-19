@@ -2,6 +2,17 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 
+const addressSchema = new mongoose.Schema(
+  {
+    contactAddress:String,
+    area: String,
+    contactNumber: Number,
+    contactName: String,
+
+  },
+  { timestamps: true }
+);
+
 const userSchema = new mongoose.Schema(
   {
     aiId: {
@@ -24,11 +35,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    address: {
-      type: String,
-      trim: true,
-      maxlength: 32,
-    },
+    address: [addressSchema],
     hashed_password: {
       type: String,
       // required: true,

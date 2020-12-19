@@ -5,7 +5,11 @@ var os = require("os");
 
 exports.newName = (slug, subText, fileExtension) => {
   if (subText && subText.length > 0) {
-    return `${slug}-${subText.split(" ").join("-")}.${fileExtension}`;
+    return `${slug}-${subText
+      .split(" ")
+      .join("-")
+      .split(".")
+      .join("-")}.${fileExtension}`;
   } else {
     return `${slug}.${fileExtension}`;
   }

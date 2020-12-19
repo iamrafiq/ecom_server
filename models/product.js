@@ -39,10 +39,12 @@ const productSchema = new mongoose.Schema(
     mrp: {
       // original body price
       type: Number,
+      default:0,
       // required: true,
     },
     cropPrice: {
       type: Number,
+      default:0,
       // required: true,
     },
 

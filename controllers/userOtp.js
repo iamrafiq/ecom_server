@@ -82,6 +82,7 @@ const sendResponce = (res, user) => {
     aiId,
     passwordProtected,
     status,
+    address,
   } = user;
 
   const verified = 1;
@@ -98,6 +99,7 @@ const sendResponce = (res, user) => {
       aiId,
       passwordProtected,
       status,
+      address
     },
   });
 };

@@ -54,7 +54,9 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 //app.use(expressValidator());
 app.use(cors());
-app.use(express.static(`${process.env.CLIENT_NAME}`));
+ app.use(express.static(`${process.env.CLIENT_NAME}`));
+ //app.use(express.static(__dirname + `${process.env.CLIENT_NAME}`));
+
 // app.use(`/${process.env.CLIENT_NAME}`, express.static(path.join(__dirname, 'public')));
 //router middlelware
 app.use("/api", authRoutes);

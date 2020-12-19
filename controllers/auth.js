@@ -95,7 +95,7 @@ exports.signup = (req, res, next) => {
             user.salt = undefined;
             user.hashed_password = undefined;
             req.user = user;
-             /**** */
+            /**** */
             next();
             // UserAiId.findOne({ aiId }, (err, aiIdUser) => {
             //   if (err || !aiIdUser) {
@@ -129,6 +129,62 @@ exports.signup = (req, res, next) => {
     });
   }
 };
+
+exports.updateProfile = (req, res) => {
+  const { phoneNumber, verified, address } = req.body;
+  console.log("req.body address", address);
+
+  User.findOne({ phoneNumber }, (err, user) => {
+    if (err) {
+      return res.status(400).json({
+        error: errorHandler(err),
+      });
+    }
+    console.log("user...?", user)
+    if (user.address){
+      user.address.push(address)
+    }else{
+      user = lodash.extend(user, req.body);
+    }
+    // user.address = address;
+    console.log("user...?1", user)
+
+    user.save((err, user) => {
+      if (err) {
+        console.log("error", err)
+
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+      const {
+        _id,
+        name,
+        phoneNumber,
+        role,
+        aiId,
+        passwordProtected,
+        status,
+        address,
+      } = user;
+      res.json({
+        user: {
+          _id,
+          name,
+          phoneNumber,
+          role,
+          verified,
+          aiId,
+          passwordProtected,
+          status,
+          verified,
+          address,
+        },
+      });
+    });
+  });
+};
+
 exports.signupResponce = (req, res) => {
   const {
     _id,
@@ -138,6 +194,7 @@ exports.signupResponce = (req, res) => {
     aiId,
     passwordProtected,
     status,
+    address,
   } = req.user;
   const verified = 0;
   res.json({
@@ -151,6 +208,7 @@ exports.signupResponce = (req, res) => {
       passwordProtected,
       status,
       verified,
+      address,
     },
   });
 };
@@ -167,12 +225,22 @@ exports.signin = (req, res, next) => {
           error: "User dose not exist. Please signup",
         });
       }
-      const { _id, name, phoneNumber, role, passwordProtected, status, aiId } = user;
+      const {
+        _id,
+        name,
+        phoneNumber,
+        role,
+        passwordProtected,
+        status,
+        aiId,
+        address,
+      } = user;
+      console.log("signin user:", user);
 
       /**
-       * 
+       *
        */
-      if (aiId !== reqAiId){
+      if (aiId !== reqAiId) {
         // signed out user or new machine
       }
       const verified = 0;
@@ -185,6 +253,7 @@ exports.signin = (req, res, next) => {
         aiId: reqAiId, // until verify new aiId use it new aiId, if user verfy this new aiId then delete it
         passwordProtected,
         status,
+        address,
       };
 
       next();
@@ -220,7 +289,7 @@ exports.signin = (req, res, next) => {
 
       //     next();
       //   });
-     // });
+      // });
 
       //const user = new User;
       //user.purr();
@@ -270,6 +339,7 @@ const signinResponce = (req, res) => {
     aiId,
     passwordProtected,
     status,
+    address,
   } = req.user;
   let otpSent = undefined;
   if (req.otpSent) {
@@ -289,6 +359,7 @@ const signinResponce = (req, res) => {
       passwordProtected,
       status,
       verified,
+      address,
     },
   };
 };

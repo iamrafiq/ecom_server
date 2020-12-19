@@ -6,6 +6,7 @@ const {
   signin,
   signinWithOtp,
   signout,
+  updateProfile,
   requireSignin,
   createAIUser,
 } = require("../controllers/auth");
@@ -17,6 +18,8 @@ const {
 
 //router.post('/signup',userSignupCondition, userSignupValidator, signup);
 // router.post('/signup', saveUser, sendOtp, signup);
+router.post("/profile/update", updateProfile);
+
 router.post("/signup", signup, signupResponce);
 router.post("/signin", signin, sendOtp, signinWithOtp);
 router.get("/signout", signout);

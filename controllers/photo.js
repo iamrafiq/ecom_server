@@ -33,7 +33,7 @@ exports.photoByFileName = (req, res, next, fileName) => {
   //req.query.p = p1 / p2/ p3/ p4/op1 /op2 / op3/op4 /i /mi/ t / bah
   //req.query.ext = "webp/jpg/png/..."
   let pathToLocalStorage = `${process.env.CLIENT_NAME}/images/${req.query.res}/${req.query.p}/${fileName}.${req.query.ext}`;
-
+  
   fs.readFile(pathToLocalStorage, (err, imageData) => {
     if (err) {
       return res.status(400).json({
