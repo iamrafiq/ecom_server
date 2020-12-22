@@ -29,7 +29,6 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       trim: true,
-      maxlength: 32,
     },
     phoneNumber: {
       type: String,

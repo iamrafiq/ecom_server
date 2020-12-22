@@ -132,7 +132,7 @@ exports.signup = (req, res, next) => {
 
 exports.updateProfile = (req, res) => {
   const { phoneNumber, verified, address } = req.body;
-  console.log("req.body address", address);
+  console.log("req.body",  req.body);
 
   User.findOne({ phoneNumber }, (err, user) => {
     if (err) {
@@ -140,12 +140,14 @@ exports.updateProfile = (req, res) => {
         error: errorHandler(err),
       });
     }
-    console.log("user...?", user)
-    if (user.address){
-      user.address.push(address)
-    }else{
-      user = lodash.extend(user, req.body);
-    }
+    // console.log("user...?", user)
+    // if (user.address){
+    //   user.address.push(address)
+    // }else{
+    //   user = lodash.extend(user, req.body);
+    // }
+    user = lodash.extend(user, req.body);
+
     // user.address = address;
     console.log("user...?1", user)
 
