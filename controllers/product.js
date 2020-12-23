@@ -717,6 +717,7 @@ exports.photo = (req, res, next) => {
 };
 
 exports.listSearch = (req, res) => {
+  console.log("search.....")
   //create query object to hold search value and category value
   const query = {};
   //assign search value to query.name
@@ -737,7 +738,7 @@ exports.listSearch = (req, res) => {
         });
       }
       res.json(products);
-    }).select("-photo");
+    }).select("-photo").limit(20);
   }
 };
 
