@@ -738,7 +738,7 @@ exports.listSearch = (req, res) => {
         });
       }
       res.json(products);
-    }).select("-photo").limit(20);
+    }).select("-photo").limit(50);
   }
 };
 

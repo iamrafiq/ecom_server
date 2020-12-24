@@ -69,7 +69,9 @@ app.use("/api", advertisementRoutes);
 app.use("/api", photoRoutes);
 app.use("/api", homeRoutes);
 app.use("/api", otpRoutes);
+app.use('/sowdamart', express.static(__dirname + '/sowdamart'));
 
+// app.use('/images', express.static(__dirname + '/images'));
 // app.get('/', (req, res)=>{
 //     res.send('hello from node');
 // });

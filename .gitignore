@@ -3,6 +3,7 @@ sowdamart
 uploads
 data
 logs
+images
 /logs/app.log
 .env
 *.wt
