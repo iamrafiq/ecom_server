@@ -20,7 +20,7 @@ exports.buildImageUrl = (nName, photoNumber, queryFieldValue) => {
   let nameWithExt = nName.split(".");
   console.log("renaming....nameAndExt", nameWithExt);
   if (process.env.BUILD_TYPE === "dev") {
-    return `https://${os.hostname()}:${process.env.PORT}/api/image/${
+    return `http://${os.hostname()}:${process.env.PORT}/api/image/${
       nameWithExt[0]
     }?p=${queryFieldValue}${photoNumber}&ext=${nameWithExt[1]}`;
   } else {

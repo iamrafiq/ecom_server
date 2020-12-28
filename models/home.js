@@ -38,9 +38,12 @@ const homeSchema = new mongoose.Schema(
     logo: {
       type: String,
     },
-    photoLanding: {
+    photoLanding: [{
       type: String,
-    },
+    }],
+    photoLandingBengali: [{
+      type: String,
+    }],
     photoTutorial: [
       {
         type: String,

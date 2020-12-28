@@ -47,14 +47,36 @@ exports.create = async (req, res) => {
   let home = new Home(fields);
   let photoTutorial = [];
   let photoTutorialBengali = [];
+  let photoLanding = [];
+  let photoLandingBengali = [];
+
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
-      home.photoLanding = await processImage(
-        i,
-        allFiles[i].file,
-        home.title.replace(" ", "-"),
-        photosFolder[0],
-        photoResolutionTypeslanding
+      photoLanding.push(
+        await processImage(
+          i,
+          allFiles[i].file,
+          home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-"),
+          photosFolder[0],
+          photoResolutionTypeslanding
+        )
+      );
+      // home.photoLanding = await processImage(
+      //   i,
+      //   allFiles[i].file,
+      //   home.title.replace(" ", "-"),
+      //   photosFolder[0],
+      //   photoResolutionTypeslanding
+      // );
+    }else if (allFiles[i].field === "photoLandingBengali") {
+      photoLandingBengali.push(
+        await processImage(
+          i,
+          allFiles[i].file,
+          `${home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
+          photosFolder[0],
+          photoResolutionTypeslanding
+        )
       );
     } else if (allFiles[i].field === "logo") {
       home.logo = await processImage(
@@ -69,7 +91,7 @@ exports.create = async (req, res) => {
         await processImage(
           i,
           allFiles[i].file,
-          home.title.replace(" ", "-"),
+          home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-"),
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -79,7 +101,7 @@ exports.create = async (req, res) => {
         await processImage(
           i,
           allFiles[i].file,
-          home.title.replace(" ", "-"),
+         `${ home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -87,6 +109,12 @@ exports.create = async (req, res) => {
     }
   }
 
+  if (photoLanding.length > 0) {
+    home.photoLanding = photoLanding;
+  }
+  if (photoLandingBengali.length > 0) {
+    home.photoLandingBengali = photoLandingBengali;
+  }
   if (photoTutorial.length > 0) {
     home.photoTutorial = photoTutorial;
   }
@@ -130,14 +158,14 @@ exports.getHome = (req, res) => {
         error: errorHandler(err),
       });
     }
-    if (data.length  > 0) {
+    if (data.length > 0) {
       data[0].advertisements = req.advertisements;
       data[0].offerProducts = req.offerProducts;
       data[0].categories = req.categories;
       res.json(data[0]);
     } else {
       res.json(null);
-    }  
+    }
   });
 };
 
@@ -165,6 +193,7 @@ exports.update = async (req, res) => {
     }); //
   });
 
+  console.log("allFiles l", allFiles.length);
   if (fields.actionG) {
     updateGallery(req, res, fields, allFiles);
   } else {
@@ -190,7 +219,7 @@ const updateGallery = async (req, res, fields, allFiles) => {
         g.photoG = await processImage(
           -1,
           allFiles[i].file,
-          fields.titleG.replace(" ", "-"),
+          fields.titleG.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-"),
           photosFolder[2],
           photoResolutionGallery
         );
@@ -224,6 +253,7 @@ const updateGallery = async (req, res, fields, allFiles) => {
 };
 const updateMainForm = async (req, res, fields, allFiles) => {
   let unLinkPhotoLanding = false;
+  let unLinkPhotoLandingBengali = false;
   let unLinkLogo = false;
   let unlinkPhotoTutorial = false;
   let unlinkPhotoTutorialBengali = false;
@@ -231,6 +261,8 @@ const updateMainForm = async (req, res, fields, allFiles) => {
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
       unLinkPhotoLanding = true;
+    } else if (allFiles[i].field === "photoLandingBengali") {
+      unLinkPhotoLandingBengali = true;
     } else if (allFiles[i].field === "photoTutorial") {
       unlinkPhotoTutorial = true;
     } else if (allFiles[i].field === "photoTutorialBengali") {
@@ -240,8 +272,26 @@ const updateMainForm = async (req, res, fields, allFiles) => {
     }
   }
   if (unLinkPhotoLanding) {
-    if (req.home.photoLanding && req.home.photoLanding.length > 0) {
-      unlinkStaticFile(req.home.photoLanding, photosFolder[0].folderName);
+    if (req.home.photoLanding) {
+      if (req.home.photoLanding.length > 0) {
+        for (let j = 0; j < req.home.photoLanding.length; j++) {
+          unlinkStaticFile(
+            req.home.photoLanding[j],
+            photosFolder[0].folderName
+          );
+        }
+      } else {
+        unlinkStaticFile(req.home.photoLanding, photosFolder[0].folderName);
+      }
+
+      //unlinkStaticFile(req.home.photoLanding, photosFolder[0].folderName);
+    }
+  }
+  if (unLinkPhotoLandingBengali) {
+    if (req.home.photoLandingBengali && req.home.photoLandingBengali.length > 0) {
+      for (let j = 0; j < req.home.photoLandingBengali.length; j++) {
+        unlinkStaticFile(req.home.photoLandingBengali[j], photosFolder[0].folderName);
+      }
     }
   }
   if (unLinkLogo) {
@@ -274,17 +324,38 @@ const updateMainForm = async (req, res, fields, allFiles) => {
 
   let photoTutorial = [];
   let photoTutorialBengali = [];
+  let photoLanding = [];
+  let photoLandingBengali = [];
 
   for (let i = 0; i < allFiles.length; i++) {
     if (allFiles[i].field === "photoLanding") {
-      home.photoLanding = await processImage(
-        i,
-        allFiles[i].file,
-        home.title.replace(" ", "-"),
-        photosFolder[0],
-        photoResolutionTypeslanding
+      photoLanding.push(
+        await processImage(
+          i,
+          allFiles[i].file,
+          home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-"),
+          photosFolder[0],
+          photoResolutionTypeslanding
+        )
       );
-    } else if (allFiles[i].field === "logo") {
+      // home.photoLanding = await processImage(
+      //   i,
+      //   allFiles[i].file,
+      //   home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-"),
+      //   photosFolder[0],
+      //   photoResolutionTypeslanding
+      // );
+    }else if (allFiles[i].field === "photoLandingBengali") {
+      photoLandingBengali.push(
+        await processImage(
+          i,
+          allFiles[i].file,
+         `${ home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
+          photosFolder[0],
+          photoResolutionTypeslanding
+        )
+      );
+    }else if (allFiles[i].field === "logo") {
       home.logo = await processImage(
         -1,
         allFiles[i].file,
@@ -297,7 +368,7 @@ const updateMainForm = async (req, res, fields, allFiles) => {
         await processImage(
           i,
           allFiles[i].file,
-          home.title.replace(" ", "-"),
+          home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-"),
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -307,7 +378,7 @@ const updateMainForm = async (req, res, fields, allFiles) => {
         await processImage(
           i,
           allFiles[i].file,
-          home.title.replace(" ", "-"),
+         `${ home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-")}-benglai`,
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -315,6 +386,12 @@ const updateMainForm = async (req, res, fields, allFiles) => {
     }
   }
 
+  if (photoLanding.length > 0) {
+    home.photoLanding = photoLanding;
+  }
+  if (photoLandingBengali.length > 0) {
+    home.photoLandingBengali = photoLandingBengali;
+  }
   if (photoTutorial.length > 0) {
     home.photoTutorial = photoTutorial;
   }

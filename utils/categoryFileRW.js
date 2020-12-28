@@ -10,7 +10,7 @@ exports.newName = (slug, fileExtension) => {
 exports.buildImageUrl = (nName, queryFieldValue) => {
   let nameAndExt = nName.split(".");
   if (process.env.BUILD_TYPE === "dev"){
-    return `https://${os.hostname()}:${process.env.PORT}/api/image/${
+    return `http://${os.hostname()}:${process.env.PORT}/api/image/${
       nameAndExt[0]
     }?p=${queryFieldValue}&ext=${nameAndExt[1]}`;
   }else{
