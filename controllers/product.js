@@ -256,7 +256,7 @@ exports.remove = (req, res) => {
     })
     .catch((error) => {
       return res.status(400).json({
-        error: errorHandler(err),
+        error: errorHandler(error),
       });
     });
   // product.remove((err, deletedProduct) => {

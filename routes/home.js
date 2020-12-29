@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {create, read, update, homeById, getHome} = require('../controllers/home');
+const {create, remove,  read, update, homeById, getHome} = require('../controllers/home');
 
 const {advertisementsByHomeSlug } = require('../controllers/advertisement');
 const {tree } = require('../controllers/category');
@@ -14,6 +14,7 @@ router.get('/:slug',  getHome);
 
 router.post('/home/create/:userId', requireSignin, isAuth, isAdmin,  create);
 router.put('/home/:homeId/:userId', requireSignin, isAuth, isAdmin, update);
+router.delete('/home/delete/:homeId/:userId', requireSignin, isAuth, isAdmin, remove);
 
 router.param('homeId', homeById);
 router.param('userId', userById);

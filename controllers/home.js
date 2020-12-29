@@ -68,12 +68,14 @@ exports.create = async (req, res) => {
       //   photosFolder[0],
       //   photoResolutionTypeslanding
       // );
-    }else if (allFiles[i].field === "photoLandingBengali") {
+    } else if (allFiles[i].field === "photoLandingBengali") {
       photoLandingBengali.push(
         await processImage(
           i,
           allFiles[i].file,
-          `${home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
+          `${home.title
+            .replace(" ", "-")
+            .replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
           photosFolder[0],
           photoResolutionTypeslanding
         )
@@ -101,7 +103,9 @@ exports.create = async (req, res) => {
         await processImage(
           i,
           allFiles[i].file,
-         `${ home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
+          `${home.title
+            .replace(" ", "-")
+            .replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -288,9 +292,15 @@ const updateMainForm = async (req, res, fields, allFiles) => {
     }
   }
   if (unLinkPhotoLandingBengali) {
-    if (req.home.photoLandingBengali && req.home.photoLandingBengali.length > 0) {
+    if (
+      req.home.photoLandingBengali &&
+      req.home.photoLandingBengali.length > 0
+    ) {
       for (let j = 0; j < req.home.photoLandingBengali.length; j++) {
-        unlinkStaticFile(req.home.photoLandingBengali[j], photosFolder[0].folderName);
+        unlinkStaticFile(
+          req.home.photoLandingBengali[j],
+          photosFolder[0].folderName
+        );
       }
     }
   }
@@ -345,17 +355,19 @@ const updateMainForm = async (req, res, fields, allFiles) => {
       //   photosFolder[0],
       //   photoResolutionTypeslanding
       // );
-    }else if (allFiles[i].field === "photoLandingBengali") {
+    } else if (allFiles[i].field === "photoLandingBengali") {
       photoLandingBengali.push(
         await processImage(
           i,
           allFiles[i].file,
-         `${ home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
+          `${home.title
+            .replace(" ", "-")
+            .replace(/[^a-zA-Z0-9]/g, "-")}-bengali`,
           photosFolder[0],
           photoResolutionTypeslanding
         )
       );
-    }else if (allFiles[i].field === "logo") {
+    } else if (allFiles[i].field === "logo") {
       home.logo = await processImage(
         -1,
         allFiles[i].file,
@@ -378,7 +390,9 @@ const updateMainForm = async (req, res, fields, allFiles) => {
         await processImage(
           i,
           allFiles[i].file,
-         `${ home.title.replace(" ", "-").replace(/[^a-zA-Z0-9]/g, "-")}-benglai`,
+          `${home.title
+            .replace(" ", "-")
+            .replace(/[^a-zA-Z0-9]/g, "-")}-benglai`,
           photosFolder[1],
           photoResolutionTypesTutorial
         )
@@ -408,4 +422,75 @@ const updateMainForm = async (req, res, fields, allFiles) => {
         error: errorHandler(error),
       });
     });
+};
+
+exports.remove = (req, res) => {
+  let home = req.home;
+  console.log("remove home")
+  home
+    .remove()
+    .then((result) => {
+      console.log("remove home inside")
+
+      if (home.photoLanding) {
+        if (home.photoLanding.length > 0) {
+          for (let j = 0; j < home.photoLanding.length; j++) {
+            unlinkStaticFile(home.photoLanding[j], photosFolder[0].folderName);
+          }
+        } else {
+          unlinkStaticFile(home.photoLanding, photosFolder[0].folderName);
+        }
+
+        //unlinkStaticFile(req.home.photoLanding, photosFolder[0].folderName);
+      }
+      if (home.photoLandingBengali && home.photoLandingBengali.length > 0) {
+        for (let j = 0; j < home.photoLandingBengali.length; j++) {
+          unlinkStaticFile(
+            home.photoLandingBengali[j],
+            photosFolder[0].folderName
+          );
+        }
+      }
+      if (home.logo && home.logo.length > 0) {
+        unlinkStaticFile(home.logo, photosFolder[3].folderName);
+      }
+      if (home.photoTutorial && home.photoTutorial.length > 0) {
+        for (let j = 0; j < home.photoTutorial.length; j++) {
+          unlinkStaticFile(home.photoTutorial[j], photosFolder[1].folderName);
+        }
+      }
+      
+      if (home.photoTutorialBengali && home.photoTutorialBengali.length > 0) {
+        for (let j = 0; j < home.photoTutorialBengali.length; j++) {
+          unlinkStaticFile(
+            home.photoTutorialBengali[j],
+            photosFolder[1].folderName
+          );
+        }
+      }
+      if (home.gallery && home.gallery.length > 0) {
+        for (let j = 0; j < home.gallery.length; j++) {
+          unlinkStaticFile(home.gallery[j], photosFolder[2].folderName);
+        }
+      }
+    })
+    .catch((error) => {
+      console.log("remove home error", error);
+
+      return res.status(400).json({
+        error: errorHandler(error),
+      });
+    });
+  // product.remove((err, deletedProduct) => {
+  //   if (err) {
+  //     return res.status(400).json({
+  //       error: errorHandler(err),
+  //     });
+  //   }
+
+  //   res.json({
+  //     //deletedProduct,
+  //     message: "Product deleted successfully",
+  //   });
+  // });
 };
