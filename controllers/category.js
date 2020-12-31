@@ -441,7 +441,7 @@ exports.getAllProductsOfACategory = (req, res) => {
     // .select("-icon -thumbnail")
     .populate("parent")
     .populate("subcats")
-    // .populate("products")
+     .populate("products")
     .populate({
       path: "recursiveCategories",
       select: { icon: 0, thumbnail: 0 },
