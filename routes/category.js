@@ -11,8 +11,8 @@ const {userById} = require('../controllers/user');
 
 router.get('/category/:categoryId',  read);
 //router.get('/category/products/byslug/:slug', advertisementsBySlug, categoryBySlug,  getAllProductsOfACategory);
-router.get('/category/products/byslug/:slug',  getAllProductsOfACategory);
-router.get('/category/products/byid/:categoryId',  getAllProductsOfACategory)    
+router.get('/category/products/byslug/:slug', productsByCategoryObj, getAllProductsOfACategory);
+router.get('/category/products/byid/:categoryId', productsByCategoryObj, getAllProductsOfACategory)    
 
 router.get('/category/children/:categoryId',  children);
 router.post('/category/create/:userId', requireSignin, isAuth, isAdmin,  create);
