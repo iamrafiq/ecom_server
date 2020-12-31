@@ -766,7 +766,7 @@ exports.decreaseQuantity = (req, res, next) => {
   });
 };
 
-exports.productsByCategory = (req, res) => {
+exports.productsByCategoryId = (req, res) => {
   //create query object to hold search value and category value
   const query = {};
   if (req.query.category) {
@@ -789,6 +789,29 @@ exports.productsByCategory = (req, res) => {
       }
       console.log("..products..", products);
       res.json(products);
+    }
+  ).select("-photo");
+};
+  
+exports.productsByCategoryObj = (req, res, next) => {
+   
+  // console.log("cat id", req.category._id);
+
+  Product.find(
+    {
+      categories: req.category._id,
+    },
+    (err, products) => {
+      console.log(err);
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      req.products = products;
+      next();
+      // console.log("..products..", products);
+      // res.json(products);
     }
   ).select("-photo");
 };

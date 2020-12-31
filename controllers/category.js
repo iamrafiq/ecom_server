@@ -441,7 +441,7 @@ exports.getAllProductsOfACategory = (req, res) => {
     // .select("-icon -thumbnail")
     .populate("parent")
     .populate("subcats")
-    .populate("products")
+    // .populate("products")
     .populate({
       path: "recursiveCategories",
       select: { icon: 0, thumbnail: 0 },
@@ -456,6 +456,7 @@ exports.getAllProductsOfACategory = (req, res) => {
           error: errorHandler(err),
         });
       }
+      data.products = req.products;
       data.advertisements = req.advertisements;
       res.json(data);
     });
