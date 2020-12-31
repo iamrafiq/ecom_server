@@ -146,7 +146,6 @@ exports.checkBySlug = (slug) => {
 };
 exports.categoryById = (req, res, next, id) => {
   console.log("categoryById", id);
-
   Category.findById(id)
     .populate("parent")
     .exec((err, category) => {
@@ -156,6 +155,8 @@ exports.categoryById = (req, res, next, id) => {
         });
       }
       req.category = category;
+      console.log("category", category);
+
       next();
     });
 };

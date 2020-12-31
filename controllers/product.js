@@ -1,10 +1,12 @@
+const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 const formidable = require("formidable"); // for uploading image
 const lodash = require("lodash"); // for updating fields
 const fs = require("fs");
 const Product = require("../models/product");
 const Category = require("../models/category");
+
 const { errorHandler } = require("../helpers/dbErrorHandler");
-var mongoose = require("mongoose");
 const {
   unlinkStaticFile,
   initClientDir,
@@ -481,7 +483,7 @@ exports.update = async (req, res) => {
     // new slug came, name change and slug change so change the names of photos in the file
     // and change the name in the url of the photos
 
-    console.log("insiiiiiiiid...")
+    console.log("insiiiiiiiid...");
     let newOfferName = "";
     if (fields.slug && fields.subText) {
       newOfferName = `${fields.slug}-${fields.subText.split(" ").join("-")}`;
@@ -717,7 +719,7 @@ exports.photo = (req, res, next) => {
 };
 
 exports.listSearch = (req, res) => {
-  console.log("search.....")
+  console.log("search.....");
   //create query object to hold search value and category value
   const query = {};
   //assign search value to query.name
@@ -738,7 +740,9 @@ exports.listSearch = (req, res) => {
         });
       }
       res.json(products);
-    }).select("-photo").limit(50);
+    })
+      .select("-photo")
+      .limit(50);
   }
 };
 
@@ -764,27 +768,33 @@ exports.decreaseQuantity = (req, res, next) => {
 
 exports.productsByCategory = (req, res) => {
   //create query object to hold search value and category value
-  console.log("....", req.params.categoryId);
   const query = {};
   if (req.query.category) {
     query.category = req.query.category;
   }
   // find the product base on query object with 2 properties
   // search and category
+  console.log("cat id", req.query.category);
 
-  Product.find(query, (err, products) => {
-    console.log(err);
-    if (err) {
-      return res.status(400).json({
-        error: err,
-      });
+  Product.find(
+    {
+      categories: req.params.categoryId,
+    },
+    (err, products) => {
+      console.log(err);
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      console.log("..products..", products);
+      res.json(products);
     }
-    res.json(products);
-  }).select("-photo");
+  ).select("-photo");
 };
 
 exports.getOfferProducts = (req, res, next) => {
-  const query = {applyOffer:1};
+  const query = { applyOffer: 1 };
   Product.find(query, (err, products) => {
     console.log(err);
     if (err) {
