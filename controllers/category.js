@@ -456,7 +456,7 @@ exports.getAllProductsOfACategory = (req, res) => {
           error: errorHandler(err),
         });
       }
-      data.products = req.products;
+      // data.products = req.products;
       data.advertisements = req.advertisements;
       res.json(data);
     });
