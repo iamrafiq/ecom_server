@@ -145,7 +145,7 @@ exports.checkBySlug = (slug) => {
     });
 };
 exports.categoryById = (req, res, next, id) => {
-  console.log("categoryById", id);
+  // console.log("categoryById", id);
   Category.findById(id)
     .populate("parent")
     .exec((err, category) => {
@@ -155,14 +155,14 @@ exports.categoryById = (req, res, next, id) => {
         });
       }
       req.category = category;
-      console.log("category", category);
+      // console.log("category", category);
 
       next();
     });
 };
 
 exports.categoryBySlug = (req, res, next, slug) => {
-  console.log("categoryBySlug", slug);
+  // console.log("categoryBySlug", slug);
   Category.findOne({ slug: slug })
     // .select("-icon -thumbnail")
     .populate("parent")
@@ -517,7 +517,7 @@ exports.list = (req, res) => {
 
 /**for rendering drawer items */
 exports.tree = (req, res, next) => {
-  console.log("home call tree")
+  // console.log("home call tree")
   Category.find()
      .populate("parent")
      .select("-products")

@@ -27,6 +27,42 @@ exports.create = async (req, res) => {
   });
   let advertisement = new Advertisement(fields);
   console.log("fields..", fields);
+  if (!files.photo){
+    return res.status(400).json({
+      error: "Upload En image",
+    });
+  }
+  if (!files.photoBangla){
+    return res.status(400).json({
+      error: "Upload Bn image",
+    });
+  }
+  if (!fields.name){
+    return res.status(400).json({
+      error: "Name not found",
+    });
+  }
+  if (!fields.slugPages){
+    return res.status(400).json({
+      error: "Slug pages (Select Category or product) not found",
+    });
+  }
+  if (!fields.linkType){
+    return res.status(400).json({
+      error: "Please select link type",
+    });
+  }
+  if (!fields.linkSlug){
+    return res.status(400).json({
+      error: "Link slug not found",
+    });
+  }
+  if (!fields.linkSlug){
+    return res.status(400).json({
+      error: "Link slug not found",
+    });
+  }
+  
   if (fields.slugPages) {
     let slugPages = fields.slugPages.split(",");
     advertisement.slugPages = slugPages;
@@ -77,8 +113,22 @@ exports.advertisementById = (req, res, next, id) => {
 exports.read = (req, res) => {
   res.json(req.advertisements);
 };
+
+exports.advertisementsByCategory = (req, res, next) => {
+  Advertisement.find({ slugPages: req.category.slug })
+    .select("-slugPages")
+    .exec((err, data) => {
+      if (err || !data) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+      req.advertisements = data;
+      next();
+    });
+};
 exports.advertisementsBySlug = (req, res, next, slug) => {
-  console.log("categoryBySlug", slug);
+  // console.log("categoryBySlug", slug);
 
   Advertisement.find({ slugPages: slug })
     .select("-slugPages")
