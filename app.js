@@ -18,6 +18,10 @@ const advertisementRoutes = require("./routes/advertisement");
 const photoRoutes = require("./routes/photo");
 const homeRoutes = require("./routes/home");
 const otpRoutes = require("./routes/userOtp");
+const groups = require("./routes/group");
+const manufacturer = require("./routes/manufacturer");
+
+
 
 
 
@@ -69,6 +73,9 @@ app.use("/api", advertisementRoutes);
 app.use("/api", photoRoutes);
 app.use("/api", homeRoutes);
 app.use("/api", otpRoutes);
+app.use("/api", groups);
+app.use("/api", manufacturer);
+
 app.use('/sowdamart', express.static(__dirname + '/sowdamart'));
 
 // app.use('/images', express.static(__dirname + '/images'));

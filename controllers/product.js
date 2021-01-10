@@ -89,6 +89,10 @@ exports.create = async (req, res) => {
       error: "Please select categories of this product",
     });
   }
+  if (fields.groups) {
+    const groups = fields.groups.split(",");
+    product.groups = groups;
+  }
   if (fields.rc) {
     const recursiveCats = fields.rc.split(",");
     product.recursiveCategories = recursiveCats;
@@ -313,6 +317,11 @@ exports.update = async (req, res) => {
   let product = req.product;
   product = lodash.extend(product, fields);
 
+  if (fields.groups) {
+    const groups = fields.groups.split(",");
+    product.groups = groups;
+  }
+
   if (fields.cats) {
     const cats = fields.cats.split(",");
     product.categories = cats;
@@ -483,7 +492,6 @@ exports.update = async (req, res) => {
     // new slug came, name change and slug change so change the names of photos in the file
     // and change the name in the url of the photos
 
-    console.log("insiiiiiiiid...");
     let newOfferName = "";
     if (fields.slug && fields.subText) {
       newOfferName = `${fields.slug}-${fields.subText.split(" ").join("-")}`;
@@ -828,4 +836,48 @@ exports.getOfferProducts = (req, res, next) => {
     req.offerProducts = products;
     next();
   }).select("-photo");
+};
+
+exports.productsBySlugs = (req, res) => {
+  //create query object to hold search value and category value
+
+  console.log("slugs", req.query.slugs);
+
+  Product.find(
+    {
+      slug: req.query.slugs.split(","),
+    },
+    (err, products) => {
+      console.log(err);
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      console.log("..slugs prod..", products);
+      res.json(products);
+    }
+  ).select("-photo");
+};
+
+exports.productBySlug = (req, res) => {
+  //create query object to hold search value and category value
+
+  console.log("slugs", req.query.slug);
+
+  Product.find(
+    {
+      slug: req.query.slug,
+    },
+    (err, products) => {
+      console.log(err);
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      console.log("..slugs prod..", products);
+      res.json(products);
+    }
+  ).select("-photo");
 };

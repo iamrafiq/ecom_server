@@ -39,12 +39,12 @@ const productSchema = new mongoose.Schema(
     mrp: {
       // original body price
       type: Number,
-      default:0,
+      default: 0,
       // required: true,
     },
     cropPrice: {
       type: Number,
-      default:0,
+      default: 0,
       // required: true,
     },
 
@@ -120,6 +120,13 @@ const productSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
+    groups: [
+      {
+        type: ObjectId,
+        ref: "Group",
+        required: true,
+      },
+    ],
     categories: [
       {
         type: ObjectId,
@@ -134,12 +141,10 @@ const productSchema = new mongoose.Schema(
         required: true,
       },
     ],
-    manufacturers: [
-      {
-        type: ObjectId,
-        ref: "Manufacturer",
-      },
-    ],
+    manufacturer: {
+      type: ObjectId,
+      ref: "Manufacturer",
+    },
     advertisements: [
       {
         // used for only loading advertisments if this product content loaded in a page, in the db there is no such a field, name advertisements is not changeable

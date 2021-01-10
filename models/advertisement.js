@@ -24,8 +24,11 @@ const advertisementSchema = new mongoose.Schema(
       required: true,
     },
     linkSlug: { 
-      type: String, // for linkType=0 slug of category for linkType=1 search text of product
+      type: String, // for linkType=0/1 slug of category 
       required: true,
+    },
+    linkProductSlug: { 
+      type: String, // only for linkType=1 slug of product
     },
     photo: {
       type: String,
