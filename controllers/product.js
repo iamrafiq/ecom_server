@@ -727,7 +727,7 @@ exports.photo = (req, res, next) => {
 };
 
 exports.listSearch = (req, res) => {
-  console.log("search.....");
+  // console.log("search.....");
   //create query object to hold search value and category value
   const query = {};
   //assign search value to query.name
@@ -782,7 +782,7 @@ exports.productsByCategoryId = (req, res) => {
   }
   // find the product base on query object with 2 properties
   // search and category
-  console.log("cat id", req.query.category);
+  // console.log("cat id", req.query.category);
 
   Product.find(
     {
@@ -795,7 +795,7 @@ exports.productsByCategoryId = (req, res) => {
           error: err,
         });
       }
-      console.log("..products..", products);
+      // console.log("..products..", products);
       res.json(products);
     }
   ).select("-photo");
@@ -810,7 +810,7 @@ exports.productsByCategoryObj = (req, res, next) => {
       categories: req.category._id,
     },
     (err, products) => {
-      console.log(err);
+      // console.log(err);
       if (err) {
         return res.status(400).json({
           error: err,
@@ -841,7 +841,7 @@ exports.getOfferProducts = (req, res, next) => {
 exports.productsBySlugs = (req, res) => {
   //create query object to hold search value and category value
 
-  console.log("slugs", req.query.slugs);
+  // console.log("slugs", req.query.slugs);
 
   Product.find(
     {
@@ -854,7 +854,7 @@ exports.productsBySlugs = (req, res) => {
           error: err,
         });
       }
-      console.log("..slugs prod..", products);
+      // console.log("..slugs prod..", products);
       res.json(products);
     }
   ).select("-photo");
@@ -863,7 +863,7 @@ exports.productsBySlugs = (req, res) => {
 exports.productBySlug = (req, res) => {
   //create query object to hold search value and category value
 
-  console.log("slugs", req.query.slug);
+  // console.log("slugs", req.query.slug);
 
   Product.find(
     {
@@ -876,7 +876,7 @@ exports.productBySlug = (req, res) => {
           error: err,
         });
       }
-      console.log("..slugs prod..", products);
+      // console.log("..slugs prod..", products);
       res.json(products);
     }
   ).select("-photo");
