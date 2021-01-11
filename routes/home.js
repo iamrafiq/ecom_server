@@ -4,7 +4,7 @@ const {create, remove,  read, update, homeById, getHome} = require('../controlle
 
 const {advertisementsByHomeSlug } = require('../controllers/advertisement');
 const {tree } = require('../controllers/category');
-const {getOfferProducts } = require('../controllers/product');
+const {getOfferProducts, getOfferProductsForHome, getOfferProductsCount } = require('../controllers/product');
 
 
 const {requireSignin, isAuth, isAdmin} = require('../controllers/auth');
@@ -19,7 +19,9 @@ router.delete('/home/delete/:homeId/:userId', requireSignin, isAuth, isAdmin, re
 router.param('homeId', homeById);
 router.param('userId', userById);
 router.param("slug",advertisementsByHomeSlug);
-router.param("slug",getOfferProducts);
+router.param("slug",getOfferProductsCount);
+router.param("slug",getOfferProductsForHome);
+
 router.param("slug",tree);
 
  

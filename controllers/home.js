@@ -155,7 +155,7 @@ exports.read = (req, res) => {
 };
 
 exports.getHome = (req, res) => {
-  console.log("getHomeWithAll");
+  // console.log("getHomeWithAll");
   Home.find().exec((err, data) => {
     if (err) {
       return res.status(400).json({
@@ -163,8 +163,10 @@ exports.getHome = (req, res) => {
       });
     }
     if (data.length > 0) {
+      
       data[0].advertisements = req.advertisements;
       data[0].offerProducts = req.offerProducts;
+      data[0].offerProductsCount = req.offerProductsCount;
       data[0].categories = req.categories;
       res.json(data[0]);
     } else {

@@ -26,6 +26,9 @@ const homeSchema = new mongoose.Schema(
     offerProducts:{
       type: Object,
     },
+    offerProductsCount:{
+      type: String,
+    },
     categories:{
       type: Object,
     },

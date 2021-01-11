@@ -71,13 +71,6 @@ exports.create = async (req, res) => {
       resolve({ fields, files });
     }); // form.parse
   });
-  /*form.parse(req, (err, fields, files) => {
-    // parsing the form for files and fields
-    if (err) {
-      return status(400).json({
-        error: "form data parsing error",
-      });
-    }*/
 
   let product = new Product(fields);
 
@@ -265,18 +258,6 @@ exports.remove = (req, res) => {
         error: errorHandler(error),
       });
     });
-  // product.remove((err, deletedProduct) => {
-  //   if (err) {
-  //     return res.status(400).json({
-  //       error: errorHandler(err),
-  //     });
-  //   }
-
-  //   res.json({
-  //     //deletedProduct,
-  //     message: "Product deleted successfully",
-  //   });
-  // });
 };
 
 exports.update = async (req, res) => {
@@ -545,44 +526,6 @@ exports.update = async (req, res) => {
   // });
 };
 
-// exports.update = (req, res) => {
-//   console.log("update.................");
-//   let form = new formidable.IncomingForm();
-//   form.keepExtensions = true;
-//   form.parse(req, (err, fields, files) => {
-//     if (err) {
-//       return res.status(400).json({
-//         error: "Image could not be uploaded",
-//       });
-//     }
-
-//     let product = req.product;
-//     product = lodash.extend(product, fields);
-//     console.log("Product", product);
-//     // 1kb = 1000
-//     // 1mb = 1000000
-
-//     if (files.photo) {
-//       // console.log("FILES PHOTO: ", files.photo);
-//       if (files.photo.size > 1000000) {
-//         return res.status(400).json({
-//           error: "Image should be less than 1mb in size",
-//         });
-//       }
-//       product.photo.data = fs.readFileSync(files.photo.path);
-//       product.photo.contentType = files.photo.type;
-//     }
-
-//     product.save((err, result) => {
-//       if (err) {
-//         return res.status(400).json({
-//           error: errorHandler(err),
-//         });
-//       }
-//       res.json(result);
-//     });
-//   });
-// };
 
 /**
  * sell / arrival
@@ -776,10 +719,10 @@ exports.decreaseQuantity = (req, res, next) => {
 
 exports.productsByCategoryId = (req, res) => {
   //create query object to hold search value and category value
-  const query = {};
-  if (req.query.category) {
-    query.category = req.query.category;
-  }
+  // const query = {};
+  // if (req.query.category) {
+  //   query.category = req.query.category;
+  // }
   // find the product base on query object with 2 properties
   // search and category
   // console.log("cat id", req.query.category);
@@ -838,6 +781,34 @@ exports.getOfferProducts = (req, res, next) => {
   }).select("-photo");
 };
 
+exports.getOfferProductsForHome = async (req, res, next) => {
+  const q = { applyOffer: 1 };
+  let query = await Product.find(q, (err, products) => {
+    console.log(err);
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    }
+    req.offerProducts = products;
+  }).limit(20);
+  next();
+};
+exports.getOfferProductsCount = async (req, res, next) => {
+  const q = { applyOffer: 1 };
+  let query = await Product.count(q, (err, count) => {
+    console.log(err);
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    }
+    // console.log("count", count)
+    req.offerProductsCount = count;
+  });
+  next();
+};
+
 exports.productsBySlugs = (req, res) => {
   //create query object to hold search value and category value
 
@@ -877,6 +848,48 @@ exports.productBySlug = (req, res) => {
         });
       }
       // console.log("..slugs prod..", products);
+      res.json(products);
+    }
+  ).select("-photo");
+};
+
+
+
+
+exports.productsByGroup = (req, res) => {
+   
+  // console.log("cat id", req.category._id);
+
+  Product.find(
+    {
+      groups: req.group._id,
+    },
+    (err, products) => {
+      // console.log(err);
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      res.json(products);
+    }
+  ).select("-photo");
+};
+exports.productsByManufacturer = (req, res) => {
+   
+  // console.log("cat id", req.category._id);
+
+  Product.find(
+    {
+      manufacturer: req.manufacturer._id,
+    },
+    (err, products) => {
+      // console.log(err);
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
       res.json(products);
     }
   ).select("-photo");
