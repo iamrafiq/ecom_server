@@ -42,11 +42,11 @@ exports.create = async (req, res) => {
       error: "Name not found",
     });
   }
-  if (!fields.slugPages){
-    return res.status(400).json({
-      error: "Slug pages (Select Category or product) not found",
-    });
-  }
+  // if (!fields.slugPages){
+  //   return res.status(400).json({
+  //     error: "Slug pages (Select Category or product) not found",
+  //   });
+  // }
   if (!fields.linkType){
     return res.status(400).json({
       error: "Please select link type",
@@ -63,6 +63,23 @@ exports.create = async (req, res) => {
     });
   }
   
+  if (fields.groups) {
+    const groups = fields.groups.split(",");
+    advertisement.groups = groups;
+  }
+
+  if (fields.categories) {
+    const categories = fields.categories.split(",");
+    advertisement.categories = categories;
+  }
+  if (fields.manufacturers) {
+    const manufacturers = fields.manufacturers.split(",");
+    advertisement.manufacturers = manufacturers;
+  }
+  if (fields.products) {
+    const products = fields.products.split(",");
+    advertisement.products = products;
+  }
   if (fields.slugPages) {
     let slugPages = fields.slugPages.split(",");
     advertisement.slugPages = slugPages;
@@ -100,6 +117,10 @@ exports.advertisementById = (req, res, next, id) => {
 
   Advertisement.findById(id)
     .populate("parent", "-icon -thumbnail")
+    .populate("categories")
+    .populate("groups")
+    .populate("manufacturers")
+    .populate("products")
     .exec((err, advertisements) => {
       if (err || !advertisements) {
         return res.status(400).json({
@@ -110,6 +131,7 @@ exports.advertisementById = (req, res, next, id) => {
       next();
     });
 };
+
 exports.read = (req, res) => {
   res.json(req.advertisements);
 };
@@ -132,6 +154,10 @@ exports.advertisementsBySlug = (req, res, next, slug) => {
 
   Advertisement.find({ slugPages: slug })
     .select("-slugPages")
+    .populate("categories")
+    .populate("groups")
+    .populate("manufacturers")
+    .populate("products")
     .exec((err, data) => {
       if (err || !data) {
         return res.status(400).json({
@@ -193,7 +219,24 @@ exports.update = async (req, res) => {
     }
   }
   let advertisement = req.advertisements;
-  advertisement = lodash.extend(advertisement, fields);
+  advertisement = lodash.extend(advertisement, fields);    
+  if (fields.groups) {
+    const groups = fields.groups.split(",");
+    advertisement.groups = groups;
+  }
+
+  if (fields.categories) {
+    const categories = fields.categories.split(",");
+    advertisement.categories = categories;
+  }
+  if (fields.manufacturers) {
+    const manufacturers = fields.manufacturers.split(",");
+    advertisement.manufacturers = manufacturers;
+  }
+  if (fields.products) {
+    const products = fields.products.split(",");
+    advertisement.products = products;
+  }
 
   if (fields.slugPages) {
     const slugPages = fields.slugPages.split(",");

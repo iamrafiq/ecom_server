@@ -124,7 +124,6 @@ const productSchema = new mongoose.Schema(
       {
         type: ObjectId,
         ref: "Group",
-        required: true,
       },
     ],
     categories: [

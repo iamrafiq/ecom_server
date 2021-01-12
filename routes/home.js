@@ -24,5 +24,5 @@ router.param("slug",getOfferProductsForHome);
 
 router.param("slug",tree);
 
- 
+  
 module.exports = router;  

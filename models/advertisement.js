@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const advertisementSchema = new mongoose.Schema(
   {
@@ -8,25 +9,49 @@ const advertisementSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    slugPages: [
-      {
-        type: String
-      },
-    ],
-    slug: { 
+    slug: {
       type: String,
       required: true,
       unique: true,
     },
-    linkType: { 
+    slugPages: [
+      {
+        type: String,
+      },
+    ],
+    groups: [
+      {
+        type: ObjectId,
+        ref: "Group",
+      },
+    ],
+    categories: [
+      {
+        type: ObjectId,
+        ref: "Category",
+      },
+    ],
+    manufacturers: [
+      {
+        type: ObjectId,
+        ref: "Manufacturer",
+      },
+    ],
+    products: [
+      {
+        type: ObjectId,
+        ref: "Product",
+      },
+    ],
+    linkType: {
       type: Number, // 0 for category or category products, 1 - for product
       required: true,
     },
-    linkSlug: { 
-      type: String, // for linkType=0/1 slug of category 
+    linkSlug: {
+      type: String, // for linkType=0/1 slug of category
       required: true,
     },
-    linkProductSlug: { 
+    linkProductSlug: {
       type: String, // only for linkType=1 slug of product
     },
     photo: {
