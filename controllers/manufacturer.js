@@ -54,7 +54,7 @@ exports.read = (req, res) => {
 exports.manufacturerBySlug = (req, res, next, slug) => {
   // console.log("categoryBySlug", slug);
 
-  Manufacturer.find({ slug: slug })
+  Manufacturer.findOne({ slug: slug })
     .select("-slugPages")
     .exec((err, data) => {
       if (err || !data) {

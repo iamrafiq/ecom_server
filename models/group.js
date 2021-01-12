@@ -9,6 +9,12 @@ const groupSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    bengaliName: {
+      type: String,
+      trim: true,
+      required: true,
+      unique: true,
+    },
     slug: {
       type: String,
       required: true,

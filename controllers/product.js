@@ -651,7 +651,12 @@ exports.listBySearch = (req, res) => {
     .exec((err, data) => {
       if (err) {
         return res.status(400).json({
-          error: "Products not found",
+          error: errorHandler(err),
+        });
+      }
+      if (!products) {
+        return res.status(400).json({
+          error: `Products not found with search`,
         });
       }
       res.json({
@@ -688,6 +693,11 @@ exports.listSearch = (req, res) => {
       if (err) {
         return res.status(400).json({
           error: err,
+        });
+      }
+      if (!products) {
+        return res.status(400).json({
+          error: `Products not found with search term ${req.query.search}`,
         });
       }
       res.json(products);
@@ -738,6 +748,11 @@ exports.productsByCategoryId = (req, res) => {
           error: err,
         });
       }
+      if (!products) {
+        return res.status(400).json({
+          error: `Products not found with category id ${req.params.categoryId}`,
+        });
+      }
       // console.log("..products..", products);
       res.json(products);
     }
@@ -747,16 +762,21 @@ exports.productsByCategoryId = (req, res) => {
 exports.productsByCategoryObj = (req, res, next) => {
    
   // console.log("cat id", req.category._id);
-
+  console.log("productsByCategoryObj")
   Product.find(
     {
       categories: req.category._id,
-    },
+    },  
     (err, products) => {
       // console.log(err);
       if (err) {
         return res.status(400).json({
           error: err,
+        });
+      }
+      if (!products) {
+        return res.status(400).json({
+          error: `Products not found with category ${req.category}`,
         });
       }
       req.products = products;
@@ -776,6 +796,11 @@ exports.getOfferProducts = (req, res, next) => {
         error: err,
       });
     }
+    if (!products) {
+      return res.status(400).json({
+        error: `Offer Products not found`,
+      });
+    }
     req.offerProducts = products;
     next();
   }).select("-photo");
@@ -788,6 +813,11 @@ exports.getOfferProductsForHome = async (req, res, next) => {
     if (err) {
       return res.status(400).json({
         error: err,
+      });
+    }
+    if (!products) {
+      return res.status(400).json({
+        error: `Offer Products not found for home`,
       });
     }
     req.offerProducts = products;
@@ -825,6 +855,11 @@ exports.productsBySlugs = (req, res) => {
           error: err,
         });
       }
+      if (!products) {
+        return res.status(400).json({
+          error: `Products not found with slugs ${req.query.slugs}`,
+        });
+      }
       // console.log("..slugs prod..", products);
       res.json(products);
     }
@@ -847,6 +882,11 @@ exports.productBySlug = (req, res) => {
           error: err,
         });
       }
+      if (!products) {
+        return res.status(400).json({
+          error: `Product not found with slug ${req.query.slug}`,
+        });
+      }
       // console.log("..slugs prod..", products);
       res.json(products);
     }
@@ -859,7 +899,7 @@ exports.productBySlug = (req, res) => {
 exports.productsByGroup = (req, res) => {
    
   // console.log("cat id", req.category._id);
-
+  console.log("groupppp...", req.group)
   Product.find(
     {
       groups: req.group._id,
@@ -871,7 +911,18 @@ exports.productsByGroup = (req, res) => {
           error: err,
         });
       }
-      res.json(products);
+
+      if (!products || products.length === 0) {
+        res.json({
+          group:req.group,
+        });
+      }else{
+        res.json({
+          group:req.group,
+          products:products
+        });
+      }
+     
     }
   ).select("-photo");
 };
@@ -884,13 +935,21 @@ exports.productsByManufacturer = (req, res) => {
       manufacturer: req.manufacturer._id,
     },
     (err, products) => {
-      // console.log(err);
       if (err) {
         return res.status(400).json({
           error: err,
         });
       }
-      res.json(products);
+      if (!products || products.length === 0) {
+        res.json({
+          manufacturer:req.manufacturer,
+        });
+      }else{
+        res.json({
+          manufacturer:req.manufacturer,
+          products:products
+        });
+      }
     }
   ).select("-photo");
 };

@@ -162,17 +162,26 @@ exports.categoryById = (req, res, next, id) => {
 };
 
 exports.categoryBySlug = (req, res, next, slug) => {
-  // console.log("categoryBySlug", slug);
+   console.log("categoryBySlug", slug);
   Category.findOne({ slug: slug })
     // .select("-icon -thumbnail")
     .populate("parent")
     .lean()
     .exec((err, category) => {
-      if (err || !category) {
+      console.log("categoryBySlug err", err);
+      console.log("categoryBySlug category", category);
+
+      if (err) {
         return res.status(400).json({
           error: errorHandler(err),
         });
       }
+      if (!category) {
+        return res.status(400).json({
+          error: `Category not found with slug: ${slug}`,
+        });
+      }
+
       req.category = category;
       next();
     });
@@ -185,9 +194,15 @@ exports.children = (req, res, next) => {
     .exec((err, categoris) => {
       if (err) {
         return res.status(400).json({
-          error: "Products not found",
+          error: errorHandler(err),
         });
       }
+      if (!categoris) {
+        return res.status(400).json({
+          error: `Categories not found`,
+        });
+      }
+
       res.json(categoris);
     });
 };
@@ -215,9 +230,15 @@ const removeFast = (category, res, parentName) => {
   // console.log("remove fast cat", category);
 
   Category.findById(category.parent).exec((err, parent) => {
-    if (err || !parent) {
+    if (err) {
       return res.status(400).json({
         error: errorHandler(err),
+      });
+    }
+
+    if (!parent) {
+      return res.status(400).json({
+        error: `Remove Fast: Category parent not found`,
       });
     }
 
@@ -435,6 +456,8 @@ exports.update = async (req, res) => {
 };
 
 exports.getAllProductsOfACategory = (req, res) => {
+  console.log("getAllProductsOfACategory")
+
   //  res.json(req.category);
   // console.log("req.catid", req.category._id)
   Category.findById(req.category._id)
@@ -453,9 +476,15 @@ exports.getAllProductsOfACategory = (req, res) => {
     .exec((err, data) => {
       if (err) {
         return res.status(400).json({
-          error: errorHandler(err),
+          error:err,
         });
       }
+      if (!data) {
+        return res.status(400).json({
+          error:`Category not found with name ${req.category.name}`,
+        });
+      }
+      // console.log("data...data", data)
       data.products = req.products;
       data.advertisements = req.advertisements;
       res.json(data);
@@ -472,7 +501,11 @@ exports.list = (req, res) => {
           error: errorHandler(err),
         });
       }
-
+      if (!data) {
+        return res.status(400).json({
+          error:`Categories not found`,
+        });
+      }
       res.json(data);
     });
 };
@@ -526,6 +559,11 @@ exports.tree = (req, res, next) => {
       if (err) {
         return res.status(400).json({
           error: errorHandler(err),
+        });
+      }
+      if (!data) {
+        return res.status(400).json({
+          error:`Categories not found`,
         });
       }
       req.categories = data;

@@ -52,9 +52,9 @@ exports.read = (req, res) => {
 
 
 exports.groupBySlug = (req, res, next, slug) => {
-  // console.log("categoryBySlug", slug);
+  //  console.log("groupBySlug", slug);
 
-  Group.find({ slug: slug })
+  Group.findOne({ slug: slug })
     .select("-slugPages")
     .exec((err, data) => {
       if (err || !data) {

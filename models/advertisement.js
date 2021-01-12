@@ -14,13 +14,12 @@ const advertisementSchema = new mongoose.Schema(
       },
     ],
     slug: { 
-      // used image url
       type: String,
       required: true,
       unique: true,
     },
     linkType: { 
-      type: Number, // 0 for category or category products, 1 - for searching product
+      type: Number, // 0 for category or category products, 1 - for product
       required: true,
     },
     linkSlug: { 
