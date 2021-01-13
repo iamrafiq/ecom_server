@@ -44,11 +44,11 @@ const advertisementSchema = new mongoose.Schema(
       },
     ],
     linkType: {
-      type: Number, // 0 for category or category products, 1 - for product
+      type: Number, // 0 for category or category products, 1 - for product, 2 - for url
       required: true,
     },
-    linkSlug: {
-      type: String, // for linkType=0/1 slug of category
+    link: {
+      type: String, // for linkType=0/1 slug of category, for linkType=2 url of a page
       required: true,
     },
     linkProductSlug: {

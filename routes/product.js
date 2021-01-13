@@ -50,8 +50,8 @@ router.get("/products/by/manufacturer/:manufacturerSlug", productsByManufacturer
 
 router.get("/products/related/:productId", listRelated);
 router.get("/products/categories", listCategories);
-router.get("/products/slugs", productsBySlugs);
-router.get("/product/slug", productBySlug);
+router.get("/products/by/slugs", productsBySlugs);
+router.get("/product/by/slug", productBySlug);
 
 /**
  * router.post('/products/by/search', listBySearch)

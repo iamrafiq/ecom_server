@@ -27,42 +27,41 @@ exports.create = async (req, res) => {
   });
   let advertisement = new Advertisement(fields);
   console.log("fields..", fields);
-  if (!files.photo){
+  if (!files.photo) {
     return res.status(400).json({
       error: "Upload En image",
     });
   }
-  if (!files.photoBangla){
+  if (!files.photoBangla) {
     return res.status(400).json({
       error: "Upload Bn image",
     });
   }
-  if (!fields.name){
+  if (!fields.name) {
     return res.status(400).json({
       error: "Name not found",
     });
   }
-  // if (!fields.slugPages){
-  //   return res.status(400).json({
-  //     error: "Slug pages (Select Category or product) not found",
-  //   });
-  // }
-  if (!fields.linkType){
+
+  if (!fields.linkType) {
     return res.status(400).json({
       error: "Please select link type",
     });
   }
-  if (!fields.linkSlug){
+  if (!fields.link) {
     return res.status(400).json({
-      error: "Link slug not found",
+      error: "Link not found",
     });
   }
-  if (!fields.linkSlug){
-    return res.status(400).json({
-      error: "Link slug not found",
-    });
+
+  if (fields.linkType === 1) {
+    if (!fields.linkProductSlug) {
+      return res.status(400).json({
+        error: "Link for product not found",
+      });
+    }
   }
-  
+
   if (fields.groups) {
     const groups = fields.groups.split(",");
     advertisement.groups = groups;
@@ -214,33 +213,71 @@ exports.update = async (req, res) => {
     }
   }
   if (files.photoBangla) {
-    if (req.advertisements.photoBangla && req.advertisements.photoBangla.length > 0) {
-      unlinkStaticFile(req.advertisements.photoBangla, photosFolder[1].folderName);
+    if (
+      req.advertisements.photoBangla &&
+      req.advertisements.photoBangla.length > 0
+    ) {
+      unlinkStaticFile(
+        req.advertisements.photoBangla,
+        photosFolder[1].folderName
+      );
     }
   }
   let advertisement = req.advertisements;
-  advertisement = lodash.extend(advertisement, fields);    
+  advertisement = lodash.extend(advertisement, fields);
+
+  console.log("field advert", fields.groups.length)
   if (fields.groups) {
-    const groups = fields.groups.split(",");
-    advertisement.groups = groups;
+    if (fields.groups.length > 0) {
+      const groups = fields.groups.split(",");
+      advertisement.groups = groups;
+    } else {
+      console.log("field advert else", fields.groups.length)
+      advertisement.groups = [];
+    }
+  }else{
+    advertisement.groups = [];
   }
 
   if (fields.categories) {
-    const categories = fields.categories.split(",");
-    advertisement.categories = categories;
+    if (fields.categories.length > 0) {
+      const categories = fields.categories.split(",");
+      advertisement.categories = categories;
+    } else {
+      
+      advertisement.categories = [];
+    }
+  }else{
+    advertisement.categories = [];
   }
   if (fields.manufacturers) {
-    const manufacturers = fields.manufacturers.split(",");
-    advertisement.manufacturers = manufacturers;
+    if (fields.manufacturers.length > 0) {
+      const manufacturers = fields.manufacturers.split(",");
+      advertisement.manufacturers = manufacturers;
+    } else {
+      advertisement.manufacturers = [];
+    }
+  }else{
+    advertisement.manufacturers = [];
   }
   if (fields.products) {
-    const products = fields.products.split(",");
-    advertisement.products = products;
+    if (fields.products.length > 0) {
+      const products = fields.products.split(",");
+      advertisement.products = products;
+    } else {
+      advertisement.products = [];
+    }
+  }else{
+    advertisement.products = [];
   }
 
   if (fields.slugPages) {
-    const slugPages = fields.slugPages.split(",");
-    advertisement.slugPages = slugPages;
+    if (fields.slugPages.length > 0) {
+      const slugPages = fields.slugPages.split(",");
+      advertisement.slugPages = slugPages;
+    } else {
+      advertisement.slugPages = "";
+    }
   }
 
   if (files.photo) {

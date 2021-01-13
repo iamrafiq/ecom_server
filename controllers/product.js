@@ -867,28 +867,23 @@ exports.productsBySlugs = (req, res) => {
 };
 
 exports.productBySlug = (req, res) => {
-  //create query object to hold search value and category value
-
-  // console.log("slugs", req.query.slug);
-
-  Product.find(
+  Product.findOne(
     {
       slug: req.query.slug,
     },
-    (err, products) => {
+    (err, product) => {
       console.log(err);
       if (err) {
         return res.status(400).json({
           error: err,
         });
       }
-      if (!products) {
+      if (!product) {
         return res.status(400).json({
           error: `Product not found with slug ${req.query.slug}`,
         });
       }
-      // console.log("..slugs prod..", products);
-      res.json(products);
+      res.json(product);
     }
   ).select("-photo");
 };
