@@ -148,6 +148,13 @@ exports.categoryById = (req, res, next, id) => {
   // console.log("categoryById", id);
   Category.findById(id)
     .populate("parent")
+    .populate("subcats")
+    // .populate("products")
+    .populate({
+      path: "recursiveCategories",
+      select: { icon: 0, thumbnail: 0 },
+      options: { sort: { order: 1 } },
+    })
     .exec((err, category) => {
       if (err || !category) {
         return res.status(400).json({
@@ -166,6 +173,13 @@ exports.categoryBySlug = (req, res, next, slug) => {
   Category.findOne({ slug: slug })
     // .select("-icon -thumbnail")
     .populate("parent")
+    .populate("subcats")
+    // .populate("products")
+    .populate({
+      path: "recursiveCategories",
+      select: { icon: 0, thumbnail: 0 },
+      options: { sort: { order: 1 } },
+    })
     .lean()
     .exec((err, category) => {
       console.log("categoryBySlug err", err);
@@ -455,41 +469,46 @@ exports.update = async (req, res) => {
     });
 };
 
-exports.getAllProductsOfACategory = (req, res) => {
-  console.log("getAllProductsOfACategory")
+// exports.getAllProductsOfACategory = (req, res) => {
+//   console.log("getAllProductsOfACategory")
 
-  //  res.json(req.category);
-  // console.log("req.catid", req.category._id)
-  Category.findById(req.category._id)
-    // .select("-icon -thumbnail")
-    .populate("parent")
-    .populate("subcats")
-    // .populate("products")
-    .populate({
-      path: "recursiveCategories",
-      select: { icon: 0, thumbnail: 0 },
-      options: { sort: { order: 1 } },
-    })
-    //.populate({path: 'recursiveCategories', options: { sort: { 'order': -1 } }})
-    //.populate("recursiveCategories", "-icon -thumbnail")
+//   //  res.json(req.category);
+//   // console.log("req.catid", req.category._id)
+//   Category.findById(req.category._id)
+//     // .select("-icon -thumbnail")
+//     .populate("parent")
+//     .populate("subcats")
+//     // .populate("products")
+//     .populate({
+//       path: "recursiveCategories",
+//       select: { icon: 0, thumbnail: 0 },
+//       options: { sort: { order: 1 } },
+//     })
+//     //.populate({path: 'recursiveCategories', options: { sort: { 'order': -1 } }})
+//     //.populate("recursiveCategories", "-icon -thumbnail")
 
-    .exec((err, data) => {
-      if (err) {
-        return res.status(400).json({
-          error:err,
-        });
-      }
-      if (!data) {
-        return res.status(400).json({
-          error:`Category not found with name ${req.category.name}`,
-        });
-      }
-      // console.log("data...data", data)
-      data.products = req.products;
-      data.advertisements = req.advertisements;
-      res.json(data);
-    });
-};
+//     .exec((err, data) => {
+//       if (err) {
+//         return res.status(400).json({
+//           error:err,
+//         });
+//       }
+//       if (!data) {
+//         return res.status(400).json({
+//           error:`Category not found with name ${req.category.name}`,
+//         });
+//       }
+//       // console.log("data...data", data)
+//       // data.products = req.products;
+//       // data.advertisements = req.advertisements;
+//       // res.json(data);
+//       res.json({
+//         category:data,
+//         products:req.products,
+//         advertisements:req.advertisements,
+//       });
+//     });
+// };
 
 exports.list = (req, res) => {
   Category.find()

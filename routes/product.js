@@ -16,14 +16,12 @@ const {
   getAllProducts,
   productsBySlugs,
   productBySlug,
-  productsByGroup,
-  productsByManufacturer,
 } = require("../controllers/product");
 const { requireSignin, isAuth, isAdmin } = require("../controllers/auth");
 const { userById } = require("../controllers/user");
 const { categoryById } = require("../controllers/category");
 const { groupBySlug } = require("../controllers/group");
-const { manufacturerBySlug } = require("../controllers/manufacturer");
+// const { manufacturerBySlug } = require("../controllers/manufacturer");
 
 router.get("/product/:productId", read);
 router.post("/product/create/:userId", requireSignin, isAuth, isAdmin, create);
@@ -45,8 +43,6 @@ router.get("/products", list);
 router.get("/allproducts", getAllProducts);
 router.get("/products/search", listSearch);
 router.get("/products/by/category/:categoryId", productsByCategoryId);
-router.get("/products/by/group/:groupSlug", productsByGroup);
-router.get("/products/by/manufacturer/:manufacturerSlug", productsByManufacturer);
 
 router.get("/products/related/:productId", listRelated);
 router.get("/products/categories", listCategories);
@@ -65,8 +61,8 @@ router.get("/product/photo/:productId", photo);
 
 router.param("userId", userById);
 router.param("productId", productById);
-router.param("groupSlug", groupBySlug);
-router.param("manufacturerSlug", manufacturerBySlug);
+// router.param("groupSlug", groupBySlug);
+// router.param("manufacturerSlug", manufacturerBySlug);
 
 
 module.exports = router;

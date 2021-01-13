@@ -357,3 +357,72 @@ exports.advertisementsByHomeSlug = (req, res, next, slug) => {
       next();
     });
 };
+
+exports.advertisementsByCategoryId = (req, res, next) => {
+  Advertisement.find(
+    {
+      categories: req.category._id,
+    },
+    (err, data) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      req.advertisements = data;
+      next();
+    }
+  ).select("-categories -manufacturers -products -groups");
+};
+
+exports.advertisementsByGroupId = (req, res, next) => {
+  Advertisement.find(
+    {
+      groups: req.group._id,
+    },
+    (err, data) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      req.advertisements = data;
+      next();
+    }
+  ).select("-categories -manufacturers -products -groups");
+};
+
+exports.advertisementsByManufacturerId = (req, res, next) => {
+  console.log("advertisementsByManufacturerId", req.manufacturer._id)
+  Advertisement.find(
+    {
+      manufacturers: req.manufacturer._id,
+    },
+    (err, data) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      console.log("Add", data)
+      req.advertisements = data;
+      next();
+    }
+  ).select("-categories -manufacturers -products -groups");
+};
+exports.advertisementsByProductId = (req, res, next) => {
+  Advertisement.find(
+    {
+      products: req.product._id,
+    },
+    (err, data) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      req.advertisements = data;
+      next();
+    }
+  ).select("-categories -manufacturers -products -groups");
+};

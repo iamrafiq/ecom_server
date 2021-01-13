@@ -526,7 +526,6 @@ exports.update = async (req, res) => {
   // });
 };
 
-
 /**
  * sell / arrival
  * return product by sell route:
@@ -758,15 +757,14 @@ exports.productsByCategoryId = (req, res) => {
     }
   ).select("-photo");
 };
-  
-exports.productsByCategoryObj = (req, res, next) => {
-   
+
+exports.productsByCategoryObj = (req, res) => {
   // console.log("cat id", req.category._id);
-  console.log("productsByCategoryObj")
+  console.log("productsByCategoryObj");
   Product.find(
     {
       categories: req.category._id,
-    },  
+    },
     (err, products) => {
       // console.log(err);
       if (err) {
@@ -779,10 +777,13 @@ exports.productsByCategoryObj = (req, res, next) => {
           error: `Products not found with category ${req.category}`,
         });
       }
-      req.products = products;
-      next();
+      // req.products = products;
       // console.log("..products..", products);
-      // res.json(products);
+      res.json({
+        category: req.category,
+        products: products,
+        advertisements: req.advertisements,
+      });
     }
   ).select("-photo");
 };
@@ -888,13 +889,9 @@ exports.productBySlug = (req, res) => {
   ).select("-photo");
 };
 
-
-
-
 exports.productsByGroup = (req, res) => {
-   
   // console.log("cat id", req.category._id);
-  console.log("groupppp...", req.group)
+  console.log("groupppp...", req.group);
   Product.find(
     {
       groups: req.group._id,
@@ -909,20 +906,20 @@ exports.productsByGroup = (req, res) => {
 
       if (!products || products.length === 0) {
         res.json({
-          group:req.group,
+          group: req.group,
+          advertisements: req.advertisements,
         });
-      }else{
+      } else {
         res.json({
-          group:req.group,
-          products:products
+          group: req.group,
+          products: products,
+          advertisements: req.advertisements,
         });
       }
-     
     }
   ).select("-photo");
 };
 exports.productsByManufacturer = (req, res) => {
-   
   // console.log("cat id", req.category._id);
 
   Product.find(
@@ -937,12 +934,14 @@ exports.productsByManufacturer = (req, res) => {
       }
       if (!products || products.length === 0) {
         res.json({
-          manufacturer:req.manufacturer,
+          manufacturer: req.manufacturer,
+          advertisements: req.advertisements,
         });
-      }else{
+      } else {
         res.json({
-          manufacturer:req.manufacturer,
-          products:products
+          manufacturer: req.manufacturer,
+          products: products,
+          advertisements: req.advertisements,
         });
       }
     }
