@@ -15,6 +15,18 @@ const manufacturerSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    nameFull: {
+      type: String,
+      trim: true,
+      required: true,
+      unique: true,
+    },
+    bengaliNameFull: {
+      type: String,
+      trim: true,
+      required: true,
+      unique: true,
+    },
     slug: {
       type: String,
       required: true,
