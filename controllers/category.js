@@ -169,7 +169,7 @@ exports.categoryById = (req, res, next, id) => {
 };
 
 exports.categoryBySlug = (req, res, next, slug) => {
-   console.log("categoryBySlug", slug);
+  console.log("categoryBySlug", slug);
   Category.findOne({ slug: slug })
     // .select("-icon -thumbnail")
     .populate("parent")
@@ -522,7 +522,7 @@ exports.list = (req, res) => {
       }
       if (!data) {
         return res.status(400).json({
-          error:`Categories not found`,
+          error: `Categories not found`,
         });
       }
       res.json(data);
@@ -571,8 +571,15 @@ exports.list = (req, res) => {
 exports.tree = (req, res, next) => {
   // console.log("home call tree")
   Category.find()
-     .populate("parent")
-     .select("-products")
+    .populate("parent")
+    .populate({
+      path: "products",
+      options: {
+        limit: 2,
+        // sort: { created: -1 },
+        // skip: req.params.pageIndex * 2,
+      },
+    })
     .sort("order")
     .exec((err, data) => {
       if (err) {
@@ -582,7 +589,7 @@ exports.tree = (req, res, next) => {
       }
       if (!data) {
         return res.status(400).json({
-          error:`Categories not found`,
+          error: `Categories not found`,
         });
       }
       req.categories = data;
