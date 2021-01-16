@@ -163,12 +163,18 @@ exports.getHome = (req, res) => {
       });
     }
     if (data.length > 0) {
-      
-      data[0].advertisements = req.advertisements;
-      data[0].offerProducts = req.offerProducts;
-      data[0].offerProductsCount = req.offerProductsCount;
-      data[0].categories = req.categories;
-      res.json(data[0]);
+      // data[0].advertisements = req.advertisements;
+      // data[0].offerProducts = req.offerProducts;
+      // data[0].offerProductsCount = req.offerProductsCount;
+      // data[0].categories = req.categories;
+      // res.json(data[0]);
+      res.json({
+        home:data[0],
+        advertisements: req.advertisements,
+        offerProducts: req.offerProducts,
+        offerProductsCount: req.offerProductsCount,
+        categories: req.categories,
+      });
     } else {
       res.json(null);
     }
@@ -428,11 +434,11 @@ const updateMainForm = async (req, res, fields, allFiles) => {
 
 exports.remove = (req, res) => {
   let home = req.home;
-  console.log("remove home")
+  console.log("remove home");
   home
     .remove()
     .then((result) => {
-      console.log("remove home inside")
+      console.log("remove home inside");
 
       if (home.photoLanding) {
         if (home.photoLanding.length > 0) {
@@ -461,7 +467,7 @@ exports.remove = (req, res) => {
           unlinkStaticFile(home.photoTutorial[j], photosFolder[1].folderName);
         }
       }
-      
+
       if (home.photoTutorialBengali && home.photoTutorialBengali.length > 0) {
         for (let j = 0; j < home.photoTutorialBengali.length; j++) {
           unlinkStaticFile(
