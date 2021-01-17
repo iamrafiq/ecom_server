@@ -575,7 +575,7 @@ exports.tree = (req, res, next) => {
     .populate({
       path: "products",
       options: {
-        limit: 2,
+        limit: 20,
         // sort: { created: -1 },
         // skip: req.params.pageIndex * 2,
       },
