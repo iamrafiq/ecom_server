@@ -176,7 +176,12 @@ exports.getHome = (req, res) => {
         categories: req.categories,
       });
     } else {
-      res.json(null);
+      res.json( res.json({
+        advertisements: req.advertisements,
+        offerProducts: req.offerProducts,
+        offerProductsCount: req.offerProductsCount,
+        categories: req.categories,
+      }));
     }
   });
 };
