@@ -572,14 +572,14 @@ exports.tree = (req, res, next) => {
   // console.log("home call tree")
   Category.find()
     .populate("parent")
-    .populate({
-      path: "products",
-      options: {
-        limit: 20,
-        // sort: { created: -1 },
-        // skip: req.params.pageIndex * 2,
-      },
-    })
+    // .populate({
+    //   path: "products",
+    //   options: {
+    //     limit: 20,
+    //     // sort: { created: -1 },
+    //     // skip: req.params.pageIndex * 2,
+    //   },
+    // })
     .sort("order")
     .exec((err, data) => {
       if (err) {
