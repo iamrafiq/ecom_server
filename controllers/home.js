@@ -169,19 +169,21 @@ exports.getHome = (req, res) => {
       // data[0].categories = req.categories;
       // res.json(data[0]);
       res.json({
-        home:data[0],
+        home: data[0],
         advertisements: req.advertisements,
         offerProducts: req.offerProducts,
         offerProductsCount: req.offerProductsCount,
         categories: req.categories,
       });
     } else {
-      res.json( res.json({
-        advertisements: req.advertisements,
-        offerProducts: req.offerProducts,
-        offerProductsCount: req.offerProductsCount,
-        categories: req.categories,
-      }));
+      res.json(
+        res.json({
+          advertisements: req.advertisements,
+          offerProducts: req.offerProducts,
+          offerProductsCount: req.offerProductsCount,
+          categories: req.categories,
+        })
+      );
     }
   });
 };
